@@ -65,3 +65,7 @@ My own data (scraped posts, opportunities, drafts, votes) is not in this repo, a
 ## Questions
 
 Find me on [LinkedIn](https://www.linkedin.com/in/kevin-meneses-gonzalez/) or at [kevinmeneses.com](https://kevinmeneses.com).
+
+## License
+
+MIT. Use it, change it and build your own.
