@@ -1,0 +1,159 @@
+{
+ "template": "carousel",
+ "theme": "plex",
+ "slides": [
+  {
+   "kind": "cover",
+   "eyebrow": "Python toolbox",
+   "title": "11 Python tools, sorted by the job they do",
+   "icons": [
+    "fluent:High voltage",
+    "fluent:Broom",
+    "fluent:Magnifying glass tilted left",
+    "fluent:Globe with meridians",
+    "fluent:Shield",
+    "fluent:Polar bear",
+    "fluent:Duck",
+    "fluent:Keyboard",
+    "fluent:Artist palette",
+    "fluent:Test tube",
+    "fluent:Notebook",
+    "fluent:Toolbox"
+   ]
+  },
+  {
+   "kind": "tool",
+   "eyebrow": "Job 1",
+   "tools": [
+    {
+     "name": "uv",
+     "icon": "fluent:High voltage",
+     "does": "Installs Python, venvs and dependencies. 10–100x faster than pip (their benchmarks).",
+     "replaces": [
+      "pip",
+      "pip-tools",
+      "pipx",
+      "poetry",
+      "pyenv",
+      "virtualenv"
+     ],
+     "cmd": "uv add httpx"
+    }
+   ],
+   "title": "Setup"
+  },
+  {
+   "kind": "tool",
+   "eyebrow": "Job 2",
+   "tools": [
+    {
+     "name": "ruff",
+     "icon": "fluent:Broom",
+     "does": "Linter + formatter in one.",
+     "replaces": [
+      "Flake8",
+      "Black",
+      "isort"
+     ],
+     "cmd": "ruff check --fix ."
+    },
+    {
+     "name": "ty",
+     "icon": "fluent:Magnifying glass tilted left",
+     "does": "Type checker from the same team. Still in beta.",
+     "cmd": "ty check"
+    }
+   ],
+   "title": "Code quality"
+  },
+  {
+   "kind": "tool",
+   "eyebrow": "Job 3",
+   "tools": [
+    {
+     "name": "httpx",
+     "icon": "fluent:Globe with meridians",
+     "does": "Sync + async HTTP, with HTTP/2.",
+     "cmd": "httpx.get(f\"{EODHD}/eod/AAPL.US\")"
+    },
+    {
+     "name": "pydantic",
+     "icon": "fluent:Shield",
+     "does": "Validate the JSON you get back with type hints.",
+     "cmd": "Bar.model_validate(row)"
+    }
+   ],
+   "title": "Talking to APIs",
+   "source": {
+    "label": "The API I call",
+    "name": "EODHD",
+    "note": "Prices, fundamentals and news in JSON.",
+    "icon": "fluent:Chart increasing"
+   }
+  },
+  {
+   "kind": "tool",
+   "eyebrow": "Job 4",
+   "tools": [
+    {
+     "name": "polars",
+     "icon": "fluent:Polar bear",
+     "does": "Lazy DataFrames that stream larger-than-RAM data.",
+     "cmd": "pl.scan_parquet(\"*.parquet\")"
+    },
+    {
+     "name": "duckdb",
+     "icon": "fluent:Duck",
+     "does": "SQL on CSV and Parquet. No server.",
+     "cmd": "duckdb.sql(\"FROM 'data.csv'\")"
+    }
+   ],
+   "title": "Data"
+  },
+  {
+   "kind": "tool",
+   "eyebrow": "Job 5",
+   "tools": [
+    {
+     "name": "typer",
+     "icon": "fluent:Keyboard",
+     "does": "Turn a function into a CLI.",
+     "cmd": "typer.run(main)"
+    },
+    {
+     "name": "rich",
+     "icon": "fluent:Artist palette",
+     "does": "Tables, colours and progress bars in the terminal.",
+     "cmd": "rich.print(table)"
+    }
+   ],
+   "title": "Shipping"
+  },
+  {
+   "kind": "tool",
+   "eyebrow": "Job 6",
+   "tools": [
+    {
+     "name": "pytest",
+     "icon": "fluent:Test tube",
+     "does": "Tests, with zero boilerplate.",
+     "cmd": "pytest -q"
+    },
+    {
+     "name": "marimo",
+     "icon": "fluent:Notebook",
+     "does": "Notebooks saved as .py files. Reactive and git-friendly.",
+     "cmd": "marimo edit app.py"
+    }
+   ],
+   "title": "Proving it works"
+  },
+  {
+   "kind": "cta",
+   "icon": "fluent:Speech balloon",
+   "eyebrow": "Your turn",
+   "title": "Which one would you swap out?",
+   "body": "Every repo link is in the post."
+  }
+ ]
+}

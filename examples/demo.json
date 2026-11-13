@@ -1,0 +1,14 @@
+{
+ "template": "demo",
+ "size": "landscape",
+ "theme": "plex",
+ "brand": {"name": "PriceFeed", "logo": "fluent:Chart increasing", "color": "#1f6fe0"},
+ "feature": {"name": "/history", "tagline": "Ten years of daily prices. One call.", "pills": ["Splits & dividends adjusted", "60+ exchanges", "JSON or CSV", "Pandas-ready", "No rate-limit surprises", "MCP server included"]},
+ "tabs": ["/history", "/quote", "/fundamentals"],
+ "input": {"value": "AAPL.US · from 2015-01-01"},
+ "button": "Run /history",
+ "loading": {"text": "PriceFeed is working…", "steps": ["Resolving ticker", "Adjusting for splits", "Adding dividends", "Formatting JSON"]},
+ "response": {"status": "200 OK", "time": "0.84s", "title": "AAPL.US · 2,718 trading days", "lines": ["2025-11-07  close 268.47  adj 268.47  vol 48.2M", "2025-11-06  close 269.77  adj 269.77  vol 51.9M", "2025-11-05  close 270.14  adj 270.14  vol 43.0M", "…", "2015-01-02  close 109.33  adj  24.29  split 4:1, 7:1"]},
+ "code": {"tabs": ["cURL", "Python", "Node.js"], "active": 1, "line": "df = pd.read_json(f\"{BASE}/history/AAPL.US?from=2015-01-01&api_key={KEY}\")"},
+ "cta": {"endpoint": "GET api.pricefeed.dev/history/{ticker}", "button": "Try PriceFeed free", "perks": ["No credit card", "1,000 calls free", "Python & Node SDKs"]}
+}

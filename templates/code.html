@@ -1,0 +1,29 @@
+<!-- Captura de código tipo Carbon, con resaltado de highlight.js.
+SPEC: {title?, subtitle?, language: "python", filename?, code, caption?} -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.10.0/styles/tokyo-night-dark.min.css">
+<style>
+#canvas{background:radial-gradient(1200px 800px at 15% 10%,#2f55ff55,transparent 60%),radial-gradient(900px 700px at 90% 95%,#1fbf7544,transparent 60%),var(--ink);color:#fff}
+.win{margin-top:40px;background:#1a1b26;border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.55);overflow:hidden;border:1px solid #2a2e45}
+.bar{display:flex;align-items:center;gap:10px;padding:20px 24px;background:#16161e}
+.dot{width:16px;height:16px;border-radius:50%}
+.fname{margin-left:14px;font:500 20px var(--mono);color:#7d849a}
+pre{margin:0;padding:28px 34px 34px;font:400 27px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
+pre code.hljs{background:transparent;padding:0}
+.cap{margin-bottom:auto;margin-top:30px;font:500 30px/1.35 var(--body);color:#c9cee0;text-wrap:balance}
+</style>
+<div id="canvas"><h1 id="t" style="font-size:64px;margin-top:auto"></h1><p class="sub" id="s"></p>
+<div class="win"><div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="fname" id="fn"></span></div><pre><code id="c"></code></pre></div>
+<p class="cap" id="cap"></p><div id="f"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.10.0/highlight.min.js"></script>
+<script>
+(function(){
+  document.getElementById('t').textContent=SPEC.title||'';
+  document.getElementById('s').textContent=SPEC.subtitle||'';
+  document.getElementById('fn').textContent=SPEC.filename||'';
+  document.getElementById('cap').textContent=SPEC.caption||'';
+  var c=document.getElementById('c');c.textContent=SPEC.code||'';c.className='language-'+(SPEC.language||'python');
+  hljs.highlightElement(c);
+  document.getElementById('f').outerHTML=footer(true);
+  done();
+})();
+</script>

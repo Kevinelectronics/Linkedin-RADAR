@@ -1,0 +1,6 @@
+{"template":"carousel","slides":[
+ {"kind":"cover","eyebrow":"Claude Code","title":"5 Claude Code habits that save me hours"},
+ {"kind":"point","eyebrow":"Habit 1","title":"Start in plan mode","body":"Let it read the code and propose a plan before touching a file. You review the plan, not 300 lines of diff."},
+ {"kind":"point","eyebrow":"Habit 2","title":"Turn repeated prompts into skills","body":"If you explain the same thing twice, write it once as a skill. Then it's one command."},
+ {"kind":"code","eyebrow":"Habit 3","title":"Give it a way to check itself","body":"Tests, a linter, or a script it can run.","code":"\"Run pytest after every change\nand fix what breaks.\""},
+ {"kind":"cta","eyebrow":"Your turn","title":"Which habit would you add?","body":"Follow for more practical AI workflows."}]}

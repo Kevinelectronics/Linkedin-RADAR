@@ -1,0 +1,3 @@
+{"template":"sketch","title":"My process for a technical article","subtitle":"(the boring part nobody shows)","footer":"#TechnicalWriting",
+ "steps":[{"label":"One real question","sub":"not a keyword"},{"label":"Real data","sub":"pull it from the API"},{"label":"Code that runs","sub":"copy, paste, works"},{"label":"Honest result","sub":"even if it's boring"}],
+ "note":"No placeholders. Ever."}

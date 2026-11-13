@@ -1,0 +1,69 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Marca de Kevin: azul tinta + cobalto + verde señal. Mismas fuentes que el radar. */
+:root{
+  --ink:#0f1220; --ink2:#171b2c; --paper:#f5f6fa; --white:#ffffff;
+  --text:#151a2b; --muted:#5b6275; --line:#dfe2ea;
+  --accent:#2f55ff; --accent-soft:#e6eafb; --good:#1fbf75; --good-soft:#e2f3ea;
+  --bad:#ef5b5b; --bad-soft:#fbe4e4; --warn:#f5a524;
+  --display:"Bricolage Grotesque", "Segoe UI", sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", Consolas, monospace;
+  --hand:"Caveat", "Segoe Print", cursive;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:var(--paper)}
+body{font-family:var(--body);color:var(--text);-webkit-font-smoothing:antialiased}
+#canvas{position:relative;width:100vw;height:100vh;overflow:hidden;display:flex;flex-direction:column;padding:72px 72px 56px}
+.dark{background:var(--ink);color:var(--white)}
+.light{background:var(--paper)}
+.eyebrow{font:600 22px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 76px/1.02 var(--display);letter-spacing:-.02em;text-wrap:balance}
+h2{font:700 44px/1.1 var(--display);text-wrap:balance}
+.sub{font:400 30px/1.35 var(--body);color:var(--muted);margin-top:18px;text-wrap:balance}
+.dark .sub{color:#9aa1b5}
+.footer{margin-top:auto;display:flex;justify-content:space-between;align-items:center;font:500 22px var(--body);color:var(--muted);padding-top:24px}
+.dark .footer{color:#7d849a}
+.footer .who{display:flex;align-items:center;gap:14px}
+.footer .av{width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font:700 18px var(--display)}
+.footer img.av{width:72px;height:72px;object-fit:cover;box-shadow:0 0 0 4px #5ee0a0}
+.footer .nm{display:flex;flex-direction:column;gap:6px;line-height:1}
+.footer .nm b{font:700 26px var(--display);color:var(--text)}
+.dark .footer .nm b,.footer.on-dark .nm b{color:#fff}
+.footer .site{align-self:flex-start;font:700 21px var(--mono);color:#0f1220;background:#5ee0a0;border-radius:999px;padding:6px 14px}
+img.i3d{width:78%;height:78%;object-fit:contain;display:block}
+img.ilu{width:60%;height:60%;display:block}
+img.ilogo{width:70%;height:70%;object-fit:contain;display:block}
+</style>
+<script>
+window.SPEC = {{SPEC}};
+window.READY = false;
+function footer(dark){var B=window.BRAND||{name:'Kevin Meneses'};
+  return '<div class="footer'+(dark?' on-dark':'')+'"><div class="who">'+(B.avatar?'<img class="av" alt="" src="'+B.avatar+'">':'<div class="av">KM</div>')+
+    '<div class="nm"><b>'+esc(B.name)+'</b>'+(B.site?'<span class="site">'+esc(B.site)+'</span>':'')+'</div></div><div>'+(SPEC.footer||'')+'</div></div>'}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function iconHTML(v){v=String(v==null?'':v);
+  if(v.indexOf('fluent:')===0){var n=v.slice(7),f=n.toLowerCase().replace(/ /g,'_');return '<img class="i3d" alt="" src="https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/'+encodeURIComponent(n)+'/3D/'+f+'_3d.png">'}
+  if(v.indexOf('lucide:')===0){return '<img class="ilu" alt="" src="https://unpkg.com/lucide-static@0.460.0/icons/'+v.slice(7)+'.svg">'}
+  var s=logoSrc(v);
+  if(s)return '<img class="ilogo" alt="" src="'+s[0]+'" data-alt="'+s.slice(1).join('|')+'" onerror="var a=(this.dataset.alt||\'\').split(\'|\').filter(Boolean);if(a.length){this.dataset.alt=a.slice(1).join(\'|\');this.src=a[0]}else{this.style.visibility=\'hidden\';this.onerror=null}">';
+  return esc(v)}
+// Logos reales de productos: "logo:python" (gilbarbara/logos, primero la versión -icon sin texto), "si:jupyter" (Simple Icons en su color),
+// "fav:eodhd.com" (favicon de cualquier web). Si una fuente falla se prueba la siguiente.
+function logoSrc(v){
+  var G='https://cdn.jsdelivr.net/gh/gilbarbara/logos@main/logos/';
+  if(v.indexOf('logo:')===0){var n=v.slice(5);return [G+n+'-icon.svg',G+n+'.svg','https://cdn.simpleicons.org/'+n.replace(/-/g,'')]}
+  if(v.indexOf('si:')===0)return ['https://cdn.simpleicons.org/'+v.slice(3)];
+  if(v.indexOf('fav:')===0)return ['https://www.google.com/s2/favicons?domain='+v.slice(4)+'&sz=128'];
+  return null}
+// Espera a que todas las imágenes carguen (o agoten sus fuentes de respaldo) y llama a done()
+function doneAfterImages(){setTimeout(function(){Promise.all([].slice.call(document.images).map(function(im){return new Promise(function(res){(function chk(){if(im.complete&&(im.naturalWidth||im.style.visibility==='hidden'||!im.dataset.alt))res();else setTimeout(chk,100)})()})})).then(done)},300)}
+function done(){ (document.fonts?document.fonts.ready:Promise.resolve()).then(function(){ setTimeout(function(){window.READY=true},150) }) }
+</script>
+</head><body>
+{{BODY}}
+
+</body></html>

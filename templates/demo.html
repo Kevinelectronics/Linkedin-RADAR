@@ -1,0 +1,126 @@
+<!-- Vídeo demo de una función de un SaaS/API (referencia: demo de Scrapingdog «/scrape», data/refs/demo_scrapingdog/).
+Interfaz recreada en HTML y animada (no es una grabación de pantalla). Formato 16:9 ("size": "landscape"); se renderiza con
+render_video.py (--music auto). Sin animar (render.py) muestra la interfaz con la respuesta, útil como portada.
+Escenas: 1 portada con la función y sus ventajas · 2 se escribe la entrada y se pulsa el botón · 3 cargando con pasos ·
+4 respuesta (estado + tiempo + resultado) · 5 pestaña de código · 6 cierre con CTA.
+SPEC: {brand: {name, logo?, color}, feature: {name, tagline, pills: [4–6 ventajas cortas]},
+       tabs?: ["/scrape","/search"], input: {value, placeholder?}, button,
+       loading: {text, steps: [3–4 pasos]}, response: {status, time, title, lines: [4–6 líneas]},
+       code: {tabs: ["cURL","Python","Node.js"], active: 1, line},
+       cta: {endpoint, button, perks: [2–3]}} -->
+<style>
+#canvas{background:#fbfcfb;color:#15201b;padding:0;font-family:var(--body);overflow:hidden;--b:#1f8f5f}
+.scene{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+/* 1 portada */
+.s1{flex-direction:column;gap:18px}
+.s1 .brand{display:flex;align-items:center;gap:14px;font:800 40px var(--display);letter-spacing:-.02em}
+.s1 .brand .lg{width:54px;height:54px;display:grid;place-items:center}.s1 .brand .lg img{width:100%;height:100%;object-fit:contain}
+.s1 .fname{font:800 150px/1 var(--display);letter-spacing:-.05em;color:var(--b)}
+.s1 .tag{font:500 34px var(--body);color:#56635c}
+.pill{position:absolute;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #e1e8e4;border-radius:999px;padding:12px 22px;font:600 24px var(--body);box-shadow:0 6px 18px #0b2a1a12}
+.pill:before{content:"✓";display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:color-mix(in srgb,var(--b) 15%,#fff);color:var(--b);font-weight:800;font-size:16px}
+/* 2–5 interfaz */
+.ui{width:1240px;background:#fff;border:1px solid #dfe7e2;border-radius:24px;box-shadow:0 30px 80px #0b2a1a1f;padding:26px 30px;display:flex;flex-direction:column;gap:18px}
+.tabs{align-self:center;display:flex;gap:6px;background:#eef3f0;border-radius:999px;padding:5px}
+.tabs span{font:700 22px var(--mono);padding:8px 22px;border-radius:999px;color:#56635c}
+.tabs span.on{background:var(--b);color:#fff}
+.row{display:flex;gap:14px}
+.inp{flex:1;display:flex;align-items:center;border:2px solid #dfe7e2;border-radius:14px;padding:0 20px;height:72px;font:500 27px var(--mono);overflow:hidden;white-space:nowrap}
+.typed{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;width:var(--w)}
+.caret{display:inline-block;width:3px;height:32px;background:var(--b);margin-left:2px;vertical-align:middle}
+.btn{background:var(--b);color:#fff;border-radius:14px;padding:0 30px;display:flex;align-items:center;font:700 26px var(--body);white-space:nowrap}
+.resp{position:relative;border:1px solid #e6ece8;border-radius:16px;min-height:330px;padding:20px 24px;background:#fcfdfc}
+.resp .lbl{font:700 17px var(--mono);letter-spacing:.1em;color:#7b8a82;text-transform:uppercase}
+.status{position:absolute;top:16px;right:18px;font:700 20px var(--mono);color:var(--b);background:color-mix(in srgb,var(--b) 12%,#fff);border-radius:8px;padding:5px 12px}
+.load{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.load b{font:700 32px var(--display);display:flex;align-items:center;gap:12px}
+.load .spin{width:30px;height:30px;border-radius:50%;border:4px solid color-mix(in srgb,var(--b) 25%,#fff);border-top-color:var(--b)}
+.steps{display:flex;gap:28px;font:600 21px var(--body);color:#8a9890}
+.steps span{display:flex;align-items:center;gap:8px}
+.steps span:before{content:"";width:18px;height:18px;border-radius:50%;border:3px solid currentColor}
+.steps span.ok{color:var(--b)}.steps span.ok:before{background:var(--b);border-color:var(--b)}
+.out{display:flex;flex-direction:column;gap:9px;margin-top:14px;font:500 24px/1.35 var(--mono)}
+.out h4{margin:0 0 4px;font:800 28px var(--display)}
+.codebar{display:flex;align-items:center;gap:6px;border-top:1px solid #e6ece8;padding-top:14px}
+.codebar span{font:700 19px var(--mono);padding:6px 14px;border-radius:8px;color:#7b8a82}
+.codebar span.on{background:#eef3f0;color:#15201b}
+.codebar em{margin-left:auto;font:600 18px var(--body);font-style:normal;color:#7b8a82}
+.code{font:500 22px var(--mono);color:#2a3a32;background:#f3f6f4;border-radius:10px;padding:12px 16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 6 cierre */
+.s6{flex-direction:column;gap:26px}
+.s6 .brand{display:flex;align-items:center;gap:16px;font:800 64px var(--display);letter-spacing:-.03em}
+.s6 .brand .lg{width:84px;height:84px}.s6 .brand .lg img{width:100%;height:100%;object-fit:contain}
+.s6 .ep{font:600 30px var(--mono);background:#eef3f0;border-radius:12px;padding:12px 24px}
+.s6 .cta{background:var(--b);color:#fff;font:700 34px var(--body);border-radius:16px;padding:20px 40px;box-shadow:0 14px 34px color-mix(in srgb,var(--b) 40%,transparent)}
+.s6 .perks{display:flex;gap:30px;font:600 24px var(--body);color:#56635c}
+.s6 .perks span:before{content:"✓ ";color:var(--b);font-weight:800}
+.by{position:absolute;right:36px;bottom:26px;display:flex;align-items:center;gap:10px;font:600 20px var(--body);color:#7b8a82}
+.by img{width:40px;height:40px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 3px #5ee0a0}
+/* animación */
+@keyframes in{from{opacity:0;scale:.96;translate:0 24px}to{opacity:1;scale:1;translate:0 0}}
+@keyframes out{from{opacity:1}to{opacity:0;scale:1.02}}
+@keyframes pop{0%{opacity:0;scale:.4}70%{opacity:1;scale:1.12}100%{opacity:1;scale:1}}
+@keyframes type{from{width:0}to{width:var(--w)}}
+@keyframes blink{50%{opacity:0}}
+@keyframes press{0%,100%{scale:1}50%{scale:.92}}
+@keyframes spin{to{rotate:360deg}}
+@keyframes check{to{color:var(--b)}}
+@keyframes fade{from{opacity:0;translate:0 10px}to{opacity:1;translate:0 0}}
+@keyframes hide{to{opacity:0;visibility:hidden}}
+@keyframes tabon{to{background:#eef3f0;color:#15201b}}
+@keyframes taboff{to{background:transparent;color:#7b8a82}}
+</style>
+<div id="canvas"></div>
+<script>
+(function(){
+  var S=SPEC,B=S.brand||{},F=S.feature||{},cv=document.getElementById('canvas');cv.style.setProperty('--b',B.color||'#1f8f5f');
+  var logo=B.logo?'<span class="lg">'+iconHTML(B.logo)+'</span>':'';
+  var pos=[[7,9],[63,8],[3,74],[68,72],[18,87],[56,87]];
+  var s1='<div class="scene s1" id="s1"><div class="brand">'+logo+esc(B.name||'')+'</div><div class="fname">'+esc(F.name||'')+'</div><div class="tag">'+esc(F.tagline||'')+'</div>'+
+    (F.pills||[]).slice(0,6).map(function(p,i){return '<div class="pill" style="left:'+pos[i][0]+'%;top:'+pos[i][1]+'%">'+esc(p)+'</div>'}).join('')+'</div>';
+  var val=String((S.input||{}).value||''),R=S.response||{},C=S.code||{},L=S.loading||{};
+  var ui='<div class="scene" id="s2"><div class="ui">'+
+    ((S.tabs||[]).length?'<div class="tabs">'+S.tabs.map(function(t,i){return '<span class="'+(i===0?'on':'')+'">'+esc(t)+'</span>'}).join('')+'</div>':'')+
+    '<div class="row"><div class="inp"><span class="typed" style="--w:'+val.length+'ch">'+esc(val)+'</span><span class="caret"></span></div><div class="btn" id="btn">'+esc(S.button||'Run')+' →</div></div>'+
+    '<div class="resp"><span class="lbl">Response</span><span class="status" id="st">'+esc(R.status||'200 OK')+' · '+esc(R.time||'')+'</span>'+
+      '<div class="load" id="ld"><b><span class="spin" id="sp"></span>'+esc(L.text||((B.name||'')+' is working…'))+'</b><div class="steps">'+(L.steps||[]).map(function(x){return '<span>'+esc(x)+'</span>'}).join('')+'</div></div>'+
+      '<div class="out" id="out">'+(R.title?'<h4>'+esc(R.title)+'</h4>':'')+(R.lines||[]).map(function(x){return '<div>'+esc(x)+'</div>'}).join('')+'</div></div>'+
+    '<div class="codebar">'+(C.tabs||['cURL','Python','Node.js']).map(function(t,i){return '<span data-i="'+i+'" class="'+(i===(C.active||0)?'on':'')+'">'+esc(t)+'</span>'}).join('')+'<em>Copy</em></div>'+
+    '<div class="code">'+esc(C.line||'')+'</div></div></div>';
+  var ct=S.cta||{};
+  var s6='<div class="scene s6" id="s6"><div class="brand">'+logo+esc(B.name||'')+'</div>'+(ct.endpoint?'<div class="ep">'+esc(ct.endpoint)+'</div>':'')+
+    '<div class="cta">'+esc(ct.button||'Try it free')+' →</div><div class="perks">'+(ct.perks||[]).map(function(p){return '<span>'+esc(p)+'</span>'}).join('')+'</div></div>';
+  var by=window.BRAND&&BRAND.avatar?'<div class="by"><img src="'+BRAND.avatar+'" alt="">Demo by '+esc(BRAND.name)+' · '+esc(BRAND.site||'')+'</div>':'';
+  cv.innerHTML=s1+ui+s6+by;
+  var q=function(s){return [].slice.call(document.querySelectorAll(s))},$=function(id){return document.getElementById(id)};
+  if(!S.animate){$('s1').style.display='none';$('s6').style.display='none';$('ld').style.display='none';doneAfterImages();return}
+  function A(el,list){if(el)el.style.animation=list.join(',')}
+  function k(name,dur,delay,fill,ease,iter){return name+' '+dur+'s '+(ease||'cubic-bezier(.2,.8,.2,1)')+' '+delay.toFixed(2)+'s '+(iter||'1')+' '+(fill||'both')}
+  // 1 portada 0–3.4
+  A($('s1'),[k('in',.6,0),k('out',.4,3.2,'forwards')]);
+  q('.pill').forEach(function(p,i){A(p,[k('pop',.45,.7+i*.22)])});
+  // 2 interfaz 3.4–13.6
+  var tType=4.2,n=val.length,tDur=Math.min(2.2,.05*n+.4);
+  A($('s2'),[k('in',.6,3.4),k('out',.4,13.6,'forwards')]);
+  A(document.querySelector('.typed'),[k('type',tDur,tType,'both','steps('+Math.max(n,1)+',end)')]);
+  A(document.querySelector('.caret'),[k('blink',.6,tType,'both','steps(1)','infinite')]);
+  var tPress=tType+tDur+.4;A($('btn'),[k('press',.3,tPress)]);
+  var tLoad=tPress+.3,steps=q('.steps span'),tOut=tLoad+.6+steps.length*.6;
+  A($('ld'),[k('fade',.3,tLoad),k('hide',.2,tOut,'forwards')]);
+  A($('sp'),[k('spin',.8,tLoad,'both','linear','infinite')]);
+  steps.forEach(function(sp,i){sp.style.animation=k('check',.2,tLoad+.5+i*.6,'forwards');sp.classList.add('ok');sp.classList.remove('ok')});
+  // marca los pasos como hechos con una clase al acabar su animación (para el render fotograma a fotograma usamos CSS: color)
+  A($('st'),[k('pop',.4,tOut)]);
+  q('#out > *').forEach(function(l,i){A(l,[k('fade',.35,tOut+.2+i*.25)])});
+  var tCode=tOut+.4+q('#out > *').length*.25+.6,act=C.active||0;
+  q('.codebar span').forEach(function(t,i){t.classList.remove('on');if(i===0)A(t,[k('taboff',.2,tCode,'forwards')]);if(i===0)t.style.background='#eef3f0',t.style.color='#15201b';if(i===act)A(t,[k('tabon',.2,tCode,'forwards')])});
+  A(document.querySelector('.code'),[k('fade',.4,tCode+.1)]);
+  // 6 cierre 13.8–
+  var t6=Math.max(13.8,tCode+3.2);$('s2').style.animation=[k('in',.6,3.4),k('out',.4,t6-.2,'forwards')].join(',');
+  A($('s6'),[k('in',.6,t6)]);
+  q('.s6 .perks span').forEach(function(p,i){A(p,[k('fade',.4,t6+.6+i*.2)])});
+  A(document.querySelector('.by'),[k('fade',.5,t6+.8)]);
+  window.ANIM_END=t6+2.2;
+  doneAfterImages();
+})();
+</script>

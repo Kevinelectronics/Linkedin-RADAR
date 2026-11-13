@@ -1,0 +1,116 @@
+{
+ "template": "chart",
+ "theme": "plex",
+ "eyebrow": "Market data",
+ "titleParts": [
+  {
+   "text": "NVIDIA didn't crash 90%.",
+   "style": "plain"
+  },
+  {
+   "text": "Your data did.",
+   "style": "accent"
+  }
+ ],
+ "subtitle": "Raw vs split-adjusted close around the 10-for-1 split",
+ "chart": {
+  "type": "line",
+  "labels": [
+   "May 28",
+   "May 29",
+   "May 30",
+   "May 31",
+   "Jun 3",
+   "Jun 4",
+   "Jun 5",
+   "Jun 6",
+   "Jun 7",
+   "Jun 10",
+   "Jun 11",
+   "Jun 12",
+   "Jun 13",
+   "Jun 14",
+   "Jun 17",
+   "Jun 18",
+   "Jun 20",
+   "Jun 21"
+  ],
+  "datasets": [
+   {
+    "label": "Raw close (USD)",
+    "data": [
+     1139,
+     1148.3,
+     1105,
+     1096.3,
+     1150,
+     1164.4,
+     1224.4,
+     1210,
+     1208.9,
+     121.79,
+     120.91,
+     125.2,
+     129.61,
+     131.88,
+     130.98,
+     135.58,
+     130.78,
+     126.57
+    ],
+    "color": "#3d6bff"
+   },
+   {
+    "label": "Split-adjusted close (USD)",
+    "data": [
+     113.9,
+     114.83,
+     110.5,
+     109.63,
+     115,
+     116.44,
+     122.44,
+     121,
+     120.89,
+     121.79,
+     120.91,
+     125.2,
+     129.61,
+     131.88,
+     130.98,
+     135.58,
+     130.78,
+     126.57
+    ],
+    "color": "#5ee0a0"
+   }
+  ]
+ },
+ "yPrefix": "$",
+ "annotation": {
+  "index": 9,
+  "label": "10:1 STOCK SPLIT",
+  "sub": "JUN 10, 2024"
+ },
+ "metrics": [
+  {
+   "value": "−89.9%",
+   "label": "Raw close",
+   "tone": "bad"
+  },
+  {
+   "value": "+0.7%",
+   "label": "Adjusted close",
+   "tone": "good"
+  }
+ ],
+ "source": "Financial Modeling Prep EOD API\nNon-split-adjusted vs light endpoints · NVDA · May 28–Jun 21, 2024",
+ "footer": "",
+ "xTicks": [
+  0,
+  4,
+  9,
+  14,
+  17
+ ]
+}

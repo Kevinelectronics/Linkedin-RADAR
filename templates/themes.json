@@ -1,0 +1,7 @@
+{
+  "_note": "Temas tipográficos para scripts/render.py (campo \"theme\" del spec). css = hojas de fuentes; display/body = familias. Por defecto: plex.",
+  "plex":    {"label": "Bricolage Grotesque + IBM Plex Sans (actual)", "css": [], "display": "\"Bricolage Grotesque\", \"Segoe UI\", sans-serif", "body": "\"IBM Plex Sans\", \"Segoe UI\", sans-serif"},
+  "geist":   {"label": "Geist (Vercel)", "css": ["https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap"], "display": "Geist, \"Segoe UI\", sans-serif", "body": "Geist, \"Segoe UI\", sans-serif", "mono": "\"Geist Mono\", Consolas, monospace"},
+  "clash":   {"label": "Clash Display + Satoshi (Fontshare)", "css": ["https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=satoshi@400,500,700&display=swap"], "display": "\"Clash Display\", \"Segoe UI\", sans-serif", "body": "Satoshi, \"Segoe UI\", sans-serif"},
+  "jakarta": {"label": "Plus Jakarta Sans", "css": ["https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"], "display": "\"Plus Jakarta Sans\", \"Segoe UI\", sans-serif", "body": "\"Plus Jakarta Sans\", \"Segoe UI\", sans-serif"}
+}

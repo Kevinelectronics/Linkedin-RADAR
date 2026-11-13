@@ -1,0 +1,184 @@
+{
+ "template": "stack",
+ "theme": "plex",
+ "titleLeft": "Writing 2024",
+ "titleRight": "Writing 2026",
+ "left": {
+  "pill": "My 2024 toolkit",
+  "pillIcon": "fluent:Card index dividers",
+  "caption": "20 tabs open. One article. Zero leads.",
+  "apps": [
+   {
+    "name": "Google Docs",
+    "logo": "fav:docs.google.com"
+   },
+   {
+    "name": "VS Code",
+    "logo": "logo:visual-studio-code"
+   },
+   {
+    "name": "Jupyter",
+    "logo": "logo:jupyter"
+   },
+   {
+    "name": "Postman",
+    "logo": "logo:postman"
+   },
+   {
+    "name": "StackOverflow",
+    "logo": "logo:stackoverflow"
+   },
+   {
+    "name": "Yahoo Fin.",
+    "logo": "fav:finance.yahoo.com"
+   },
+   {
+    "name": "Sales Nav",
+    "logo": "logo:linkedin-icon"
+   },
+   {
+    "name": "Hunter",
+    "logo": "fav:hunter.io"
+   },
+   {
+    "name": "Excel",
+    "logo": "fav:excel.cloud.microsoft"
+   },
+   {
+    "name": "ChatGPT",
+    "logo": "logo:openai"
+   },
+   {
+    "name": "Selenium",
+    "logo": "logo:selenium"
+   },
+   {
+    "name": "Chrome",
+    "logo": "logo:chrome"
+   },
+   {
+    "name": "Notion",
+    "logo": "logo:notion"
+   },
+   {
+    "name": "Sheets",
+    "logo": "si:googlesheets"
+   },
+   {
+    "name": "Medium",
+    "logo": "logo:medium"
+   },
+   {
+    "name": "WordPress",
+    "logo": "logo:wordpress-icon"
+   },
+   {
+    "name": "Gmail",
+    "logo": "logo:google-gmail"
+   },
+   {
+    "name": "Drive",
+    "logo": "logo:google-drive"
+   },
+   {
+    "name": "Canva",
+    "logo": "fav:canva.com"
+   },
+   {
+    "name": "Lemlist",
+    "logo": "fav:lemlist.com"
+   }
+  ]
+ },
+ "right": {
+  "pill": "My 2026 AI OS",
+  "pillIcon": "fluent:File folder",
+  "caption": "One chat. Articles and leads.",
+  "path": "kevin-meneses / writing-os",
+  "rows": [
+   {
+    "type": "file",
+    "name": "CLAUDE.md",
+    "desc": "My voice. Claude reads it first.",
+    "tag": "Rules",
+    "tagColor": "#ef5b5b"
+   },
+   {
+    "type": "folder",
+    "name": "skills/",
+    "desc": "One folder per job.",
+    "tag": "Skills",
+    "tagColor": "#3b82f6",
+    "children": [
+     {
+      "name": "article-writer/",
+      "desc": "Drafts the long-form piece"
+     },
+     {
+      "name": "eodhd-content-writer/",
+      "desc": "Real data, runnable code"
+     },
+     {
+      "name": "linkedin-viral-post/",
+      "desc": "Turns it into a post"
+     },
+     {
+      "name": "b2b-outreach/",
+      "desc": "Finds the buyer, drafts the email"
+     }
+    ]
+   },
+   {
+    "type": "group",
+    "name": "Connected tools",
+    "desc": "The APIs Claude can call.",
+    "tag": "Tools",
+    "tagColor": "#f5a524",
+    "children": [
+     {
+      "name": "Data",
+      "desc": "EODHD, FMP",
+      "logos": [
+       "fav:eodhd.com",
+       "fav:financialmodelingprep.com"
+      ]
+     },
+     {
+      "name": "Scrape",
+      "desc": "Apify, Playwright",
+      "logos": [
+       "logo:apify",
+       "logo:playwright"
+      ]
+     },
+     {
+      "name": "Leads",
+      "desc": "Clay, Apollo",
+      "logos": [
+       "fav:clay.com",
+       "fav:apollo.io"
+      ]
+     },
+     {
+      "name": "Code",
+      "desc": "Python, Claude Code, GitHub",
+      "logos": [
+       "logo:python",
+       "logo:claude-icon",
+       "logo:github-icon"
+      ]
+     },
+     {
+      "name": "Publish",
+      "desc": "Zernio, LinkedIn, dev.to",
+      "logos": [
+       "fav:zernio.com",
+       "logo:linkedin-icon",
+       "si:devdotto"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

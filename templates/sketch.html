@@ -1,0 +1,45 @@
+<!-- Estilo dibujado a mano (tipo Excalidraw) con rough.js.
+SPEC: {title, subtitle?, steps: [{label, sub?, color?: "accent"|"good"|"bad"|"warn"}], note?, direction?: "down"|"right"} -->
+<style>
+#canvas{background:#fffdf8}
+#board{position:relative;flex:1;margin-top:28px;min-height:0}
+#board svg{position:absolute;inset:0}
+.node{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 22px}
+.node b{font:700 46px/1.05 var(--hand);color:#1e1e1e}
+.node span{font:600 30px/1.15 var(--hand);color:#55596a;margin-top:6px}
+.htitle{font:700 84px/1 var(--hand);color:#1e1e1e}
+.note{font:700 38px/1.2 var(--hand);color:#2f55ff;text-align:center;margin-top:10px}
+</style>
+<div id="canvas"><div class="htitle" id="t"></div><p class="sub" id="s" style="font-family:var(--hand);font-size:38px;color:#55596a"></p><div id="board"></div><div class="note" id="n"></div><div id="f"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script>
+(function(){
+  document.getElementById('t').textContent=SPEC.title||'';
+  document.getElementById('s').textContent=SPEC.subtitle||'';
+  document.getElementById('n').textContent=SPEC.note||'';
+  document.getElementById('f').outerHTML=footer(false);
+  var fills={accent:'#a5b4ff',good:'#b2f2bb',bad:'#ffc9c9',warn:'#ffec99'};
+  var board=document.getElementById('board'), W=board.clientWidth, H=board.clientHeight;
+  var steps=SPEC.steps||[], n=steps.length, down=(SPEC.direction||'down')==='down';
+  var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('width',W);svg.setAttribute('height',H);board.appendChild(svg);
+  var rc=rough.svg(svg), boxes=[];
+  steps.forEach(function(st,i){
+    var bw,bh,x,y;
+    if(down){bh=Math.min(150,(H-40*(n-1))/n);bw=Math.min(760,W-40);x=(W-bw)/2;y=i*(bh+(H-bh*n)/Math.max(n-1,1));}
+    else{bw=Math.min(300,(W-50*(n-1))/n);bh=Math.min(340,H*.6);y=(H-bh)/2;x=i*(bw+(W-bw*n)/Math.max(n-1,1));}
+    var col=fills[st.color||(['accent','good','warn','bad'][i%4])];
+    svg.appendChild(rc.rectangle(x,y,bw,bh,{roughness:1.6,bowing:1.2,stroke:'#1e1e1e',strokeWidth:3,fill:col,fillStyle:'hachure',hachureGap:9,fillWeight:2}));
+    boxes.push([x,y,bw,bh]);
+    var d=document.createElement('div');d.className='node';d.style.cssText='left:'+x+'px;top:'+y+'px;width:'+bw+'px;height:'+bh+'px';
+    d.innerHTML='<b>'+esc(st.label)+'</b>'+(st.sub?'<span>'+esc(st.sub)+'</span>':'');board.appendChild(d);
+  });
+  for(var i=0;i<boxes.length-1;i++){
+    var a=boxes[i],b=boxes[i+1],x1,y1,x2,y2;
+    if(down){x1=a[0]+a[2]/2;y1=a[1]+a[3]+6;x2=b[0]+b[2]/2;y2=b[1]-8;}else{x1=a[0]+a[2]+6;y1=a[1]+a[3]/2;x2=b[0]-8;y2=b[1]+b[3]/2;}
+    svg.appendChild(rc.line(x1,y1,x2,y2,{roughness:1.8,stroke:'#1e1e1e',strokeWidth:3}));
+    var ang=Math.atan2(y2-y1,x2-x1),L=22;
+    [-.5,.5].forEach(function(s){svg.appendChild(rc.line(x2,y2,x2-L*Math.cos(ang+s),y2-L*Math.sin(ang+s),{roughness:1.2,stroke:'#1e1e1e',strokeWidth:3}))});
+  }
+  done();
+})();
+</script>

@@ -1,0 +1,6 @@
+# Your own data never goes in the repo
+data/
+assets/avatar.jpg
+.env
+*.mp4
+__pycache__/

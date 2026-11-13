@@ -1,0 +1,24 @@
+<!-- Diagrama de flujo con Mermaid. SPEC: {title, subtitle?, eyebrow?, mermaid: "flowchart LR ...", theme?: "dark"|"light"} -->
+<style>
+#diagram{flex:1;display:flex;align-items:center;justify-content:center;margin-top:36px;min-height:0}
+#diagram svg{max-width:100%;max-height:100%;height:auto}
+</style>
+<div id="canvas"><div class="eyebrow" id="eb"></div><h1 id="t" style="margin-top:14px"></h1><p class="sub" id="s"></p><div id="diagram"></div><div id="f"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<script>
+(function(){
+  var dark=(SPEC.theme||'dark')==='dark', c=document.getElementById('canvas');
+  c.className=dark?'dark':'light';
+  document.getElementById('eb').textContent=SPEC.eyebrow||'';
+  document.getElementById('t').textContent=SPEC.title||'';
+  document.getElementById('s').textContent=SPEC.subtitle||'';
+  document.getElementById('f').outerHTML=footer(dark);
+  mermaid.initialize({startOnLoad:false,theme:'base',flowchart:{curve:'basis',padding:24,nodeSpacing:46,rankSpacing:64,htmlLabels:true},
+    themeVariables:{fontFamily:'IBM Plex Sans',fontSize:'26px',
+      primaryColor:dark?'#1b2140':'#ffffff',primaryTextColor:dark?'#ffffff':'#151a2b',primaryBorderColor:'#2f55ff',
+      lineColor:dark?'#8ea2ff':'#2f55ff',secondaryColor:dark?'#163527':'#e2f3ea',tertiaryColor:dark?'#3d1d22':'#fbe4e4',
+      clusterBkg:dark?'#171b2c':'#eef0f7',clusterBorder:dark?'#2a3046':'#dfe2ea',edgeLabelBackground:dark?'#0f1220':'#f5f6fa'}});
+  document.fonts.load('26px "IBM Plex Sans"').then(function(){return mermaid.render('m1',SPEC.mermaid)}).then(function(r){document.getElementById('diagram').innerHTML=r.svg;done()})
+    .catch(function(e){document.getElementById('diagram').textContent='Mermaid error: '+e;window.READY=true});
+})();
+</script>

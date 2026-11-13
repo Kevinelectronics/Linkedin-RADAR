@@ -1,0 +1,7 @@
+{
+  "_note": "LinkedIn creators whose posts you want to learn from (viral ideas). Max 10 per Apify run; the script batches them.",
+  "creators": [
+    {"name": "Creator One", "url": "https://www.linkedin.com/in/creator-one/"},
+    {"name": "Creator Two", "url": "https://www.linkedin.com/in/creator-two/"}
+  ]
+}

@@ -1,0 +1,88 @@
+<!-- Rueda / ruleta de un stack (referencia: «AI-native GTM stack 2027» de Maja Voje, data/refs/wheel_gtm_stack_voje.png).
+Centro con la categoría principal, anillo de segmentos de colores con los logos de cada uno y, por fuera, etiquetas de sub-categorías.
+Con "animate": true (render_video.py) la rueda gira como una ruleta y se para con el segmento `pointerTo` bajo el puntero.
+SPEC: {title, highlight?: palabra del título que va subrayada, subtitle?,
+       center: {label, logo?},
+       segments: [{label, color, items: [{name, logo}], outer?: ["sub-etiqueta", ...]}],   4–6 segmentos, 2–6 logos cada uno
+       pointerTo?: índice del segmento que queda arriba (por defecto 0),
+       shared?: {label, items: [{name, logo}]}  fila inferior de herramientas comunes} -->
+<style>
+#canvas{background:#f6f6f8;color:#16161d;padding:52px 56px 40px;background-image:linear-gradient(#e9e9ef 1px,transparent 1px),linear-gradient(90deg,#e9e9ef 1px,transparent 1px);background-size:36px 36px}
+#t{text-align:center;font:800 78px/1.02 var(--display);letter-spacing:-.035em}
+#t mark{background:#ffe838;color:inherit;padding:0 .12em;border-radius:4px}
+#s{text-align:center;font:500 26px var(--body);color:#5b5f6e;margin-top:10px}
+.stage{position:relative;flex:1;display:grid;place-items:center;min-height:0;margin-top:14px}
+.ptr{position:absolute;top:-6px;left:50%;transform:translateX(-50%);z-index:3;width:46px;height:58px}
+svg.wh{width:860px;height:860px;overflow:visible}
+.rot{transform-origin:430px 430px;transform-box:view-box}
+.seglabel{font:800 26px var(--display);fill:#1b1b22;letter-spacing:-.01em}
+.outlabel{font:700 21px var(--body);fill:#3a3d4a}
+.lg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.12))}
+.center{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.core{width:250px;height:250px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7c5cff,#4b23c8 70%);box-shadow:0 0 0 14px #ffffffcc,0 18px 50px #4b23c855;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font:800 44px var(--display);gap:8px}
+.core img{width:64px;height:64px;object-fit:contain}
+.shared{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:12px;background:#fff;border:1px solid #e3e3ea;border-radius:16px;padding:12px 18px;font:600 20px var(--body)}
+.shared .lbl{color:#6b6e7c;font:700 16px var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-right:6px}
+.shared span.it{display:inline-flex;align-items:center;gap:7px}
+.shared img{width:26px;height:26px;object-fit:contain}
+/* animación */
+@keyframes spin{from{rotate:var(--from)}to{rotate:var(--to)}}
+@keyframes pop{0%{opacity:0;scale:.3}70%{opacity:1;scale:1.15}100%{opacity:1;scale:1}}
+@keyframes up{from{opacity:0;translate:0 30px}to{opacity:1;translate:0 0}}
+@keyframes glow{0%,100%{opacity:0}50%{opacity:.9}}
+</style>
+<div id="canvas"><h1 id="t"></h1><p id="s"></p>
+<div class="stage" id="stage"><div id="wrap" style="position:absolute;left:50%;top:50%;width:860px;height:860px;transform:translate(-50%,-50%)">
+<svg class="ptr" viewBox="0 0 46 58"><path d="M23 56 L4 18 A21 21 0 1 1 42 18 Z" fill="#ffe838" stroke="#16161d" stroke-width="3"/><circle cx="23" cy="20" r="7" fill="#16161d"/></svg>
+<svg class="wh" id="wh" viewBox="0 0 860 860"></svg>
+<div class="center"><div class="core" id="core"></div></div>
+</div></div>
+<div id="shared"></div><div id="f"></div></div>
+<script>
+(function(){
+  var S=SPEC,segs=S.segments||[],n=segs.length,C=430,R0=150,R1=320,R2=405;
+  var title=esc(S.title||'');if(S.highlight)title=title.replace(esc(S.highlight),'<mark>'+esc(S.highlight)+'</mark>');
+  document.getElementById('t').innerHTML=title;document.getElementById('s').textContent=S.subtitle||'';
+  var core=document.getElementById('core');core.innerHTML=(S.center&&S.center.logo?iconHTML(S.center.logo):'')+'<span>'+esc((S.center||{}).label||'')+'</span>';
+  function pt(r,a){a=(a-90)*Math.PI/180;return [C+r*Math.cos(a),C+r*Math.sin(a)]}
+  function arc(r1,r2,a1,a2){var p1=pt(r2,a1),p2=pt(r2,a2),p3=pt(r1,a2),p4=pt(r1,a1),l=a2-a1>180?1:0;
+    return 'M'+p1+' A'+r2+' '+r2+' 0 '+l+' 1 '+p2+' L'+p3+' A'+r1+' '+r1+' 0 '+l+' 0 '+p4+' Z'}
+  var step=360/n,svg='<g class="rot" id="rot">';
+  segs.forEach(function(s,i){
+    var a1=i*step-step/2,a2=a1+step,col=s.color||['#c8f2c0','#cfd8ff','#ffd9b0','#f3cff7','#c9f0e6','#fff1a8'][i%6];
+    svg+='<path d="'+arc(R0,R1,a1+.6,a2-.6)+'" fill="'+col+'" fill-opacity=".55" stroke="#fff" stroke-width="4"/>';
+    svg+='<path d="'+arc(R1+6,R2,a1+.6,a2-.6)+'" fill="'+col+'" stroke="#fff" stroke-width="4"/>';
+    // etiqueta del segmento en el anillo exterior, siguiendo la curva
+    var mid=(a1+a2)/2,flip=mid>90&&mid<270,rr=(R1+R2)/2+9,id='p'+i,pa=flip?pt(rr,a2-2):pt(rr,a1+2),pb=flip?pt(rr,a1+2):pt(rr,a2-2);
+    svg+='<path id="'+id+'" d="M'+pa+' A'+rr+' '+rr+' 0 0 '+(flip?0:1)+' '+pb+'" fill="none"/>';
+    svg+='<text class="seglabel" text-anchor="middle"><textPath href="#'+id+'" startOffset="50%">'+esc(s.label)+'</textPath></text>';
+    // logos repartidos en la parte interior del segmento
+    var it=s.items||[],k=it.length,rows=k>3?2:1;
+    it.forEach(function(x,j){
+      var row=rows===2?(j<Math.ceil(k/2)?0:1):0,inRow=rows===2?(row===0?Math.ceil(k/2):k-Math.ceil(k/2)):k,idx=rows===2&&row===1?j-Math.ceil(k/2):j;
+      var r=rows===2?(row===0?R1-44:R0+46):(R0+R1)/2,span=rows===2&&row===1?step*0.5:step*0.62,aa=mid-span/2+(inRow===1?span/2:span*idx/(inRow-1));
+      var p=pt(r,aa);
+      svg+='<g class="lg" data-seg="'+i+'"><circle cx="'+p[0]+'" cy="'+p[1]+'" r="31" fill="#fff"/><foreignObject x="'+(p[0]-22)+'" y="'+(p[1]-22)+'" width="44" height="44"><div xmlns="http://www.w3.org/1999/xhtml" class="li" style="width:44px;height:44px;display:grid;place-items:center">'+iconHTML(x.logo||'')+'</div></foreignObject></g>';
+    });
+  });
+  svg+='</g>';
+  document.getElementById('wh').innerHTML=svg;
+  function fit(){var st=document.getElementById('stage').getBoundingClientRect(),k=Math.min(1,(st.height-10)/880,st.width/880);document.getElementById('wrap').style.transform='translate(-50%,-50%) scale('+k+')'}
+  [].slice.call(document.querySelectorAll('.li img')).forEach(function(im){im.style.width='40px';im.style.height='40px';im.style.objectFit='contain'});
+  if(S.shared&&S.shared.items)document.getElementById('shared').outerHTML='<div class="shared"><span class="lbl">'+esc(S.shared.label||'Shared')+'</span>'+S.shared.items.map(function(x){return '<span class="it">'+iconHTML(x.logo||'')+esc(x.name)+'</span>'}).join('')+'</div>';
+  document.getElementById('f').outerHTML=footer(false);
+  // rotación final: el segmento pointerTo queda arriba (bajo el puntero)
+  var target=-((S.pointerTo||0)*step),rot=document.getElementById('rot');
+  rot.style.rotate=target+'deg';
+  if(S.animate){
+    function A(el,name,delay,dur,ease){if(el)el.style.animation=name+' '+dur+'s '+(ease||'cubic-bezier(.2,.8,.2,1)')+' '+delay.toFixed(2)+'s both'}
+    A(document.getElementById('t'),'up',.1,.6);A(document.getElementById('s'),'up',.35,.6);
+    A(document.querySelector('.core'),'pop',.5,.6);
+    rot.style.setProperty('--from',(target-1440-step*0.5)+'deg');rot.style.setProperty('--to',target+'deg');
+    A(rot,'spin',.9,4.2,'cubic-bezier(.12,.75,.18,1)');
+    var sh=document.querySelector('.shared');A(sh,'up',5.3,.6);A(document.querySelector('.footer'),'up',5.6,.6);
+    window.ANIM_END=6.4;
+  }
+  fit();doneAfterImages();
+})();
+</script>

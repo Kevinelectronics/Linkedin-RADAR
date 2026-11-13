@@ -1,0 +1,77 @@
+<!-- Hub central con herramientas alrededor (estilo "Top APIs for X" de Ruben Davoli).
+SPEC: {title: [{text, style: "bold"|"accent"|"serif"}], subtitle, center: {label, chip?, glyph?},
+       top: [nodes], left: [nodes], right: [nodes], bottom: [nodes], partner?: "Gaffa"}
+node: {label, glyph?: "texto corto o emoji", hl?: true (destacado en naranja), dark?: true}
+Recomendado: top 4-9, left/right 4-10, bottom 4-9. -->
+<style>
+#canvas{background:#fbfaf8;padding:0;color:#141414;font-family:Inter,var(--body)}
+#grid{position:absolute;inset:0;background-image:linear-gradient(#ececec 1px,transparent 1px),linear-gradient(90deg,#ececec 1px,transparent 1px);background-size:74px 74px;opacity:.7}
+#head{position:absolute;left:40px;right:40px;top:44px;text-align:center}
+#head h1{font:800 60px/1.08 Inter,sans-serif;letter-spacing:-.035em;text-wrap:balance}
+#head h1 .accent{font-style:italic;color:#ea6a43}
+#head h1 .serif{font:italic 400 68px/1 "Instrument Serif",serif;letter-spacing:-.01em}
+#head p{margin-top:14px;font:400 24px/1.3 Inter,sans-serif;color:#555}
+#head p b{color:#141414;font-weight:600}
+svg#wires{position:absolute;inset:0}
+.node{position:absolute;display:flex;align-items:center;gap:12px;font:500 17px Inter,sans-serif;color:#777;white-space:nowrap}
+.node .tile{width:58px;height:58px;border-radius:15px;background:#fff;border:1px solid #e3e3e3;box-shadow:0 2px 6px rgba(0,0,0,.06);display:grid;place-items:center;font:700 22px Inter,sans-serif;color:#141414;flex:none}
+.node.hl .tile{border:3px solid #ea6a43;box-shadow:0 0 0 5px #ea6a4322}
+.node.hl{color:#141414;font-weight:700}
+.node.drk .tile{background:#141414;color:#fff}
+.node.v{flex-direction:column;gap:8px;width:120px;text-align:center}
+.node.v span{max-width:120px;white-space:normal;line-height:1.1}
+.node.left{flex-direction:row-reverse}
+#center{position:absolute;width:224px;height:250px;border-radius:38px;background:#fff;border:2px solid #f0b8a5;box-shadow:0 18px 50px rgba(234,106,67,.18);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+#center .g{font:800 64px/1 Inter;color:#ea6a43}
+#center .g img.ilogo{width:72px;height:72px}
+#center b{font:800 34px/1.05 Inter;letter-spacing:-.02em;text-align:center}
+#center i{font:600 15px "IBM Plex Mono",monospace;letter-spacing:.14em;color:#ea6a43;background:#fdeee8;border-radius:999px;padding:6px 14px;font-style:normal}
+#pill{position:absolute;left:50%;transform:translateX(-50%);bottom:34px;display:flex;align-items:center;gap:18px;background:#fff;border:1px solid #e3e3e3;border-radius:999px;padding:10px 12px 10px 12px;box-shadow:0 6px 20px rgba(0,0,0,.08);font:700 24px Inter;white-space:nowrap}
+#pill .av{width:46px;height:46px;border-radius:50%;background:#2f55ff;color:#fff;display:grid;place-items:center;font:800 17px Inter}
+#pill img.av{width:56px;height:56px;object-fit:cover;box-shadow:0 0 0 3px #5ee0a0}
+#pill .site{font:700 18px var(--mono);color:#0f1220;background:#5ee0a0;border-radius:999px;padding:5px 12px}
+#pill .x{color:#999;font-weight:500}
+#pill .cta{background:#1d2b6b;color:#fff;border-radius:999px;padding:12px 22px;font:600 22px Inter}
+</style>
+<div id="canvas"><div id="grid"></div><svg id="wires"></svg><div id="head"><h1 id="t"></h1><p id="s"></p></div><div id="center"></div><div id="pill"></div></div>
+<script>
+(function(){
+  var W=innerWidth,H=innerHeight,c=document.getElementById('canvas'),svg=document.getElementById('wires');
+  svg.setAttribute('width',W);svg.setAttribute('height',H);
+  document.getElementById('t').innerHTML=(SPEC.title||[]).map(function(p){return '<span class="'+(p.style||'bold')+'">'+esc(p.text)+'</span>'}).join(' ');
+  document.getElementById('s').innerHTML=esc(SPEC.subtitle||'').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+  var cn=SPEC.center||{};
+  document.getElementById('center').innerHTML='<div class="g">'+iconHTML(cn.glyph||'✳')+'</div><b>'+esc(cn.label||'')+'</b>'+(cn.chip?'<i>● '+esc(cn.chip)+'</i>':'');
+  document.getElementById('pill').innerHTML=(window.BRAND&&BRAND.avatar?'<img class="av" alt="" src="'+BRAND.avatar+'">':'<div class="av">KM</div>')+'Kevin Meneses'+(window.BRAND&&BRAND.site?'<span class="site">'+esc(BRAND.site)+'</span>':'')+(SPEC.partner?'<span class="x">×</span>'+esc(SPEC.partner):'')+'<span class="cta">+ Follow for more</span>';
+  // geometría
+  var headB=document.getElementById('head').getBoundingClientRect().bottom;
+  var top0=Math.max(300, Math.round(headB+120)), bot0=H-235, L=190, R=W-190;
+  var C={w:224,h:250}; C.x=(W-C.w)/2; C.y=(top0+bot0)/2-C.h/2+20;
+  var ce=document.getElementById('center');ce.style.left=C.x+'px';ce.style.top=C.y+'px';
+  function spread(n,a,b){var o=[];for(var i=0;i<n;i++)o.push(n===1?(a+b)/2:a+(b-a)*i/(n-1));return o}
+  function node(n,x,y,side){
+    var d=document.createElement('div');d.className='node'+(n.hl?' hl':'')+(n.dark?' drk':'')+(side==='top'||side==='bottom'?' v':'')+(side==='left'?' left':'');
+    var lab='<span>'+esc(n.label)+'</span>',tile='<div class="tile">'+(n.glyph?iconHTML(n.glyph):esc(n.label.replace(/[^A-Za-z0-9]/g,'').slice(0,2)))+'</div>';
+    d.innerHTML=side==='bottom'?tile+lab:(side==='top'?lab+tile:tile+lab);
+    c.appendChild(d);
+    var r=d.getBoundingClientRect(),t=d.querySelector('.tile').getBoundingClientRect();
+    var dx=x-(t.left+t.width/2),dy=y-(t.top+t.height/2);d.style.left=dx+'px';d.style.top=dy+'px';
+    return {x:x,y:y,hl:n.hl};
+  }
+  function wire(pts,hl){
+    var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d','M'+pts.map(function(q){return q[0]+','+q[1]}).join(' L'));
+    p.setAttribute('fill','none');p.setAttribute('stroke',hl?'#ea6a43':'#c9c9d6');p.setAttribute('stroke-width',hl?3:2);p.setAttribute('stroke-dasharray',hl?'10 7':'6 7');
+    svg.appendChild(p);
+  }
+  var T=SPEC.top||[],B=SPEC.bottom||[],Lf=SPEC.left||[],Rt=SPEC.right||[];
+  var xsT=spread(T.length,L+90,R-90), xsB=spread(B.length,L+90,R-90);
+  var ysL=spread(Lf.length,top0+70,bot0-40), ysR=spread(Rt.length,top0+70,bot0-40);
+  function entry(n,i,a,b){return a+(b-a)*(i+1)/(n+1)}
+  T.forEach(function(n,i){var q=node(n,xsT[i],top0,'top');var ex=entry(T.length,i,C.x+20,C.x+C.w-20),my=top0+60+(i%4)*24;wire([[q.x,q.y+29],[q.x,my],[ex,my],[ex,C.y]],n.hl)});
+  B.forEach(function(n,i){var q=node(n,xsB[i],bot0,'bottom');var ex=entry(B.length,i,C.x+20,C.x+C.w-20),my=bot0-60-(i%4)*24;wire([[q.x,q.y-29],[q.x,my],[ex,my],[ex,C.y+C.h]],n.hl)});
+  Lf.forEach(function(n,i){var q=node(n,L,ysL[i],'left');var ey=entry(Lf.length,i,C.y+20,C.y+C.h-20),mx=L+70+(i%5)*26;wire([[q.x+29,q.y],[mx,q.y],[mx,ey],[C.x,ey]],n.hl)});
+  Rt.forEach(function(n,i){var q=node(n,R,ysR[i],'right');var ey=entry(Rt.length,i,C.y+20,C.y+C.h-20),mx=R-70-(i%5)*26;wire([[q.x-29,q.y],[mx,q.y],[mx,ey],[C.x+C.w,ey]],n.hl)});
+  doneAfterImages();
+})();
+</script>

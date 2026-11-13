@@ -1,0 +1,2 @@
+{"template":"flow","eyebrow":"AI agents","title":"How an AI agent actually works","subtitle":"It's a loop, not a single answer.","footer":"#AIagents #MCP",
+ "mermaid":"flowchart TD\n  A([You ask a question]) --> B[LLM plans the next step]\n  B --> C{Needs a tool?}\n  C -- yes --> D[Call tool via MCP<br/>search · API · code]\n  D --> E[Read the result]\n  E --> B\n  C -- no --> F([Final answer with sources])\n  style F fill:#163527,stroke:#1fbf75,color:#fff\n  style D fill:#1b2140,stroke:#8ea2ff,color:#fff"}

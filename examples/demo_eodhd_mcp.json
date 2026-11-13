@@ -1,0 +1,14 @@
+{
+ "template": "demo",
+ "size": "landscape",
+ "theme": "plex",
+ "brand": {"name": "EODHD APIs", "logo": "fav:eodhd.com", "color": "#e5512b"},
+ "feature": {"name": "MCP Server", "tagline": "Ask Claude about any stock. It answers with real market data.", "pills": ["150,000+ tickers", "Prices, fundamentals & news", "Claude Code, ChatGPT & agents", "One URL to connect", "Insider & congress trades", "No SDK needed"]},
+ "tabs": ["Claude Code", "claude.ai", "ChatGPT"],
+ "input": {"value": "How did Apple and Tesla do this year?"},
+ "button": "Ask Claude",
+ "loading": {"text": "Claude is calling EODHD APIs…", "steps": ["AAPL.US prices", "TSLA.US prices", "Year-to-date returns"]},
+ "response": {"status": "EODHD data", "time": "to Nov 10, 2026", "title": "Apple beat Tesla by 44 points this year", "lines": ["AAPL.US  $271.12 → $348.51   +28.5%   year high $350.69 (Nov 9)", "TSLA.US  $449.72 → $379.78   −15.6%   year high $451.67 (Jan 5)", "Dec 31, 2025 → Nov 10, 2026 · adjusted closes"]},
+ "code": {"tabs": ["Claude Code", "Python", "Cursor"], "active": 0, "line": "claude mcp add --transport http eodhd \"https://mcp.eodhd.com/v1/mcp?apikey=YOUR_KEY\""},
+ "cta": {"endpoint": "https://mcp.eodhd.com/v1/mcp", "button": "Connect EODHD APIs to Claude", "perks": ["Free demo key", "150,000+ tickers", "Claude, ChatGPT & custom agents"]}
+}

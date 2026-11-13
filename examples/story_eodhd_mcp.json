@@ -1,0 +1,16 @@
+{
+ "template": "launch",
+ "style": "soft",
+ "size": "landscape",
+ "theme": "plex",
+ "brand": {"name": "EODHD APIs", "logo": "fav:eodhd.com", "color": "#e5512b"},
+ "beats": [
+  {"type": "words", "text": "Your agent sounds sure.", "dur": 1.8},
+  {"type": "card", "icon": "logo:claude-icon", "title": "Claude", "tag": "Guessed", "tone": "bad", "sections": [{"big": true, "lines": ["Apple: about +12% this year", "No source. Based on old training data."]}], "dur": 2.4},
+  {"type": "switch", "icon": "fav:eodhd.com", "label": "EODHD APIs MCP", "dur": 1.7},
+  {"type": "flow", "hot": 1, "nodes": [{"icon": "logo:claude-icon", "label": "Claude", "sub": "Your question"}, {"icon": "fav:eodhd.com", "label": "EODHD APIs", "sub": "get_historical_stock_prices"}, {"icon": "fluent:Check mark button", "label": "Answer", "sub": "Real, sourced data"}], "dur": 2.6},
+  {"type": "card", "icon": "logo:claude-icon", "title": "Claude", "tag": "Verified", "tone": "good", "sections": [{"big": true, "lines": ["Apple: +28.5% this year", "AAPL  $271.12 → $348.51", "Adjusted closes · Dec 31, 2025 → Nov 10, 2026", "Source: EODHD APIs"]}], "dur": 3.0},
+  {"type": "words", "text": "Real data, every answer.", "dur": 1.8},
+  {"type": "end", "title": "EODHD APIs MCP Server", "button": "Connect EODHD APIs to Claude", "sub": "Free demo key · 150,000+ tickers", "dur": 2.8}
+ ]
+}

@@ -1,0 +1,20 @@
+{
+ "template": "landscape",
+ "theme": "plex",
+ "title": "The AI Agent Stack",
+ "highlight": "AI Agent",
+ "subtitle": "40 tools across 9 layers, grouped by the job they do.",
+ "accent": "#7c3aed",
+ "top": {"label": "Models", "sub": "The brain", "items": [{"name": "Claude", "logo": "logo:claude-icon"}, {"name": "GPT", "logo": "logo:openai"}, {"name": "Gemini", "logo": "si:googlegemini"}, {"name": "Llama", "logo": "si:meta"}]},
+ "rows": [
+  {"label": "Agent frameworks", "sub": "Loops, tools, state", "items": [{"name": "LangGraph", "logo": "si:langgraph"}, {"name": "CrewAI", "logo": "fav:crewai.com"}, {"name": "Agents SDK", "logo": "logo:openai"}, {"name": "Claude SDK", "logo": "logo:claude-icon"}]},
+  {"label": "Tool integrations", "sub": "MCP & app connectors", "items": [{"name": "Composio", "logo": "fav:composio.dev"}, {"name": "Zapier MCP", "logo": "fav:zapier.com"}, {"name": "Pipedream", "logo": "fav:pipedream.com"}, {"name": "Arcade", "logo": "fav:arcade.dev"}]},
+  {"label": "Web search", "sub": "Fresh answers, cited", "items": [{"name": "Tavily", "logo": "fav:tavily.com"}, {"name": "Exa", "logo": "fav:exa.ai"}, {"name": "SerpApi", "logo": "fav:serpapi.com"}, {"name": "Brave Search", "logo": "fav:brave.com"}]},
+  {"label": "Browser use", "sub": "Click, type, log in", "items": [{"name": "Browserbase", "logo": "fav:browserbase.com"}, {"name": "Browser Use", "logo": "fav:browser-use.com"}, {"name": "Steel", "logo": "fav:steel.dev"}, {"name": "Skyvern", "logo": "fav:skyvern.com"}]},
+  {"label": "Web extraction", "sub": "Pages to clean data", "items": [{"name": "Firecrawl", "logo": "fav:firecrawl.dev"}, {"name": "Gaffa", "logo": "fav:gaffa.dev"}, {"name": "Apify", "logo": "logo:apify"}, {"name": "Jina Reader", "logo": "fav:jina.ai"}]},
+  {"label": "Domain data APIs", "sub": "Facts the model lacks", "items": [{"name": "EODHD", "logo": "fav:eodhd.com"}, {"name": "SEC EDGAR", "logo": "fav:sec.gov"}, {"name": "FRED", "logo": "fav:fred.stlouisfed.org"}, {"name": "Google Maps", "logo": "logo:google-maps"}]},
+  {"label": "Memory", "sub": "Remember across runs", "items": [{"name": "Mem0", "logo": "fav:mem0.ai"}, {"name": "Pinecone", "logo": "fav:pinecone.io"}, {"name": "Qdrant", "logo": "fav:qdrant.tech"}, {"name": "pgvector", "logo": "logo:postgresql"}]},
+  {"label": "Sandboxes", "sub": "Run code safely", "items": [{"name": "E2B", "logo": "fav:e2b.dev"}, {"name": "Daytona", "logo": "fav:daytona.io"}, {"name": "Modal", "logo": "fav:modal.com"}, {"name": "Vercel", "logo": "logo:vercel-icon"}]},
+  {"label": "Observability", "sub": "Traces & evals", "items": [{"name": "LangSmith", "logo": "fav:smith.langchain.com"}, {"name": "Langfuse", "logo": "fav:langfuse.com"}, {"name": "Braintrust", "logo": "fav:braintrust.dev"}, {"name": "Phoenix", "logo": "fav:arize.com"}]}
+ ]
+}

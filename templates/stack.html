@@ -1,0 +1,115 @@
+<!-- "Caos vs sistema" (referencia: post de Charlie Hills "Design 2025 vs Design 2026" que encanta a Kevin, 2026-11-04,
+data/ref_charlie_ai_os.jpg). Izquierda: logos reales de apps desordenados y girados. Derecha: ventana de "repo" ordenada
+con árbol de archivos, etiquetas de colores y bandejas de logos.
+SPEC: {titleLeft, titleRight, vs?: "vs",
+       left:  {pill, pillIcon?, caption, apps: [{name, logo}]},              8–24 apps
+       right: {pill, pillIcon?, caption, path, rows: [
+                 {type: "file"|"folder", name, desc?, tag?, tagColor?, children?: [{name, desc?}]},
+                 {type: "group", name, desc?, tag?, tagColor?, children: [{name, desc, logos: [...]}]} ]}}
+Logos: "logo:python" (gilbarbara/logos, color; prueba primero la versión -icon, sin texto), "si:jupyter" (Simple Icons en su color), "fav:eodhd.com" (favicon de cualquier web),
+"fluent:Nombre" o emoji. Con "animate": true (lo pone render_video.py) los elementos entran animados. Con "logo:" se prueba en cadena logos → Simple Icons → nada, así que conviene comprobar el render. -->
+<style>
+#canvas{padding:0;background:#f4efe8;color:#1d1d1f}
+.half{position:absolute;top:0;bottom:0;width:50%;background-size:28px 28px}
+.hl{left:0;background-color:#eef0f4;background-image:linear-gradient(#dfe3ea 1px,transparent 1px),linear-gradient(90deg,#dfe3ea 1px,transparent 1px)}
+.hr{right:0;background-color:#f5f0e8;background-image:linear-gradient(#e9e1d4 1px,transparent 1px),linear-gradient(90deg,#e9e1d4 1px,transparent 1px)}
+.wrap{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:40px 36px 30px}
+#t{text-align:center;font:800 76px/1 var(--display);letter-spacing:-.04em;white-space:nowrap}
+#t .a{color:#1a6dff}#t .b{color:#d97757}#t .vs{font:500 40px var(--body);color:#8a8f99;margin:0 14px;letter-spacing:0}
+.cols{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:26px;min-height:0}
+.col{display:flex;flex-direction:column;min-height:0}
+.pill{align-self:center;display:inline-flex;align-items:center;gap:12px;background:#fff;border-radius:999px;padding:14px 28px;font:700 32px var(--display);letter-spacing:-.02em;box-shadow:0 2px 0 #00000008,0 6px 20px #0000000f;border:1px solid #e6e8ee}
+.pill .pi{width:34px;height:34px;display:grid;place-items:center}.pill .pi img{width:100%;height:100%}
+.pill em{font-style:normal}.l .pill em{color:#1a6dff}.r .pill em{color:#d97757}
+.cap{text-align:center;font:500 25px var(--body);color:#1d1d1f;margin-top:16px}
+/* izquierda: caos */
+.mess{position:relative;flex:1;margin-top:22px;min-height:0}
+.app{position:absolute;width:142px;height:142px;background:#fff;border-radius:26px;box-shadow:0 2px 2px #0000000a,0 10px 24px #00000014;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.app .lg{width:58px;height:58px;display:grid;place-items:center}
+.app .lg img{width:100%;height:100%;object-fit:contain}
+.app span{font:600 18px var(--body);color:#2a2d34;white-space:nowrap;max-width:136px;overflow:hidden;text-overflow:ellipsis}
+/* derecha: sistema */
+.win{flex:1;margin-top:22px;background:#fbfaf7;border:1px solid #e6dfd3;border-radius:22px;box-shadow:0 14px 40px #0000001a;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.bar{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#f1ece4;border-bottom:1px solid #e6dfd3;font:500 19px var(--body);color:#5c5f66}
+.bar i{width:13px;height:13px;border-radius:50%;display:inline-block}
+.bar img{width:30px;height:30px;border-radius:50%;object-fit:cover;margin:0 4px 0 10px}
+.rows{flex:1;display:flex;flex-direction:column;justify-content:space-evenly;padding:6px 18px 10px;min-height:0}
+.row{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:9px 0;border-bottom:1px solid #ece6db}
+.row:last-child{border-bottom:0}
+.row b{display:block;font:700 24px/1.1 var(--display);letter-spacing:-.01em}
+.row small{display:block;font:500 17px/1.25 var(--body);color:#6b6e75;margin-top:3px}
+.tag{display:inline-flex;align-items:center;gap:7px;font:500 17px var(--body);color:#6b6e75;white-space:nowrap}
+.tag i{width:13px;height:13px;border-radius:50%;display:inline-block}
+.ico svg{width:40px;height:40px;display:block}
+.kids{margin-left:18px;border-left:2px solid #d8d0c3;padding:2px 0 4px}
+.kid{position:relative;display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:center;padding:6px 0 6px 22px}
+.kid:before{content:"";position:absolute;left:0;top:50%;width:16px;border-top:2px solid #d8d0c3}
+.kid .ico svg{width:32px;height:32px}
+.kid b,.kid small{display:block}.kid b{font-size:21px}.kid small{font-size:16px}
+.grp{grid-template-columns:auto 1fr;gap:16px;padding:9px 0 9px 22px}
+.tray{display:flex;gap:6px;background:#fff;border-radius:14px;padding:8px;box-shadow:0 2px 8px #0000001a}
+.tray span{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:#fff;border:1px solid #eee}
+.tray img{width:28px;height:28px;object-fit:contain}
+.pill .pi img.i3d{width:100%;height:100%}
+.wrap .footer{padding-top:14px}
+/* animación (solo con SPEC.animate, la activa scripts/render_video.py) */
+@keyframes up{from{opacity:0;translate:0 40px}to{opacity:1;translate:0 0}}
+@keyframes drop{0%{opacity:0;translate:0 -140px;scale:.4}60%{opacity:1;translate:0 12px;scale:1.06}100%{opacity:1;translate:0 0;scale:1}}
+@keyframes pop{0%{opacity:0;scale:.3}70%{opacity:1;scale:1.15}100%{opacity:1;scale:1}}
+@keyframes slide{from{opacity:0;translate:-36px 0}to{opacity:1;translate:0 0}}
+@keyframes win{from{opacity:0;scale:.94;translate:0 40px}to{opacity:1;scale:1;translate:0 0}}
+</style>
+<div id="canvas"><div class="half hl"></div><div class="half hr"></div>
+<div class="wrap"><h1 id="t"></h1><div class="cols"><div class="col l" id="L"></div><div class="col r" id="R"></div></div><div id="f"></div></div></div>
+<script>
+(function(){
+  var S=SPEC;
+  var FOLDER='<svg viewBox="0 0 40 40"><path d="M4 11a3 3 0 0 1 3-3h8l4 4h14a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" fill="#e0855f"/><path d="M4 16h32v14a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" fill="#ec9a74"/></svg>';
+  function FILE(ext,c){return '<svg viewBox="0 0 40 40"><path d="M9 3h15l9 9v23a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" fill="#fff" stroke="#c9cdd4" stroke-width="1.5"/><path d="M24 3v9h9" fill="none" stroke="#c9cdd4" stroke-width="1.5"/><rect x="3" y="22" width="24" height="11" rx="2.5" fill="'+(c||'#e0855f')+'"/><text x="15" y="30.5" text-anchor="middle" font-family="Arial" font-weight="700" font-size="8" fill="#fff">'+ext+'</text></svg>'}
+  var logo=iconHTML; // logo:/si:/fav: se resuelven en _base.html
+  function pill(x,isL){var p=esc(x.pill).replace(/(\d{4}|AI OS)/,'<em>$1</em>');
+    return '<div class="pill">'+(x.pillIcon?'<span class="pi">'+logo(x.pillIcon)+'</span>':'')+p+'</div>'}
+  document.getElementById('t').innerHTML='<span class="a" style="display:inline-block">'+esc(S.titleLeft)+'</span><span class="vs" style="display:inline-block">'+esc(S.vs||'vs')+'</span><span class="b" style="display:inline-block">'+esc(S.titleRight)+'</span>';
+  // izquierda: rejilla con jitter y giro (pseudoaleatorio con semilla para que el render sea estable)
+  var seed=7;function rnd(){seed=(seed*16807)%2147483647;return seed/2147483647}
+  var A=S.left.apps||[];
+  document.getElementById('L').innerHTML=pill(S.left,true)+'<div class="mess" id="M"></div><div class="cap">'+esc(S.left.caption||'')+'</div>';
+  document.getElementById('R').innerHTML=pill(S.right,false)+'<div class="win"><div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>'+
+    (window.BRAND&&BRAND.avatar?'<img src="'+BRAND.avatar+'">':'')+esc(S.right.path||'')+'</div><div class="rows">'+
+    (S.right.rows||[]).map(function(r){
+      var tag=r.tag?'<span class="tag"><i style="background:'+(r.tagColor||'#e0855f')+'"></i>'+esc(r.tag)+'</span>':'<span></span>';
+      var ext=(r.name.match(/\.(\w+)$/)||[])[1];
+      var ic=r.type==='folder'?FOLDER:r.type==='group'?FILE('MCP','#e0a43a'):FILE((ext||'MD').toUpperCase());
+      var h='<div class="row"><div class="ico">'+ic+'</div><div><b>'+esc(r.name)+'</b>'+(r.desc?'<small>'+esc(r.desc)+'</small>':'')+'</div>'+tag+'</div>';
+      if(r.children&&r.children.length){
+        h+='<div class="kids">'+r.children.map(function(k){
+          if(k.logos)return '<div class="kid grp"><div class="tray">'+k.logos.map(function(l){return '<span>'+logo(l)+'</span>'}).join('')+'</div><div><b>'+esc(k.name)+'</b>'+(k.desc?'<small>'+esc(k.desc)+'</small>':'')+'</div></div>';
+          return '<div class="kid"><div class="ico">'+FOLDER+'</div><div><b>'+esc(k.name)+'</b>'+(k.desc?'<small>'+esc(k.desc)+'</small>':'')+'</div></div>';
+        }).join('')+'</div>';
+      }
+      return h;
+    }).join('')+'</div></div><div class="cap">'+esc(S.right.caption||'')+'</div>';
+  document.getElementById('f').outerHTML=footer(false);
+  var M=document.getElementById('M'),W=M.clientWidth,H=M.clientHeight,cols=3,rows=Math.ceil(A.length/cols),cw=(W-142)/(cols-1),rh=rows>1?(H-142)/(rows-1):0;
+  M.innerHTML=A.map(function(a,i){
+    var c=i%cols,r=Math.floor(i/cols),x=c*cw+(rnd()-.5)*44+(r%2?cw*.28:0),y=r*rh+(rnd()-.5)*26,rot=(rnd()-.5)*22;
+    x=Math.max(-6,Math.min(W-136,x));
+    return '<div class="app" style="left:'+x+'px;top:'+y+'px;transform:rotate('+rot.toFixed(1)+'deg);z-index:'+Math.floor(rnd()*20)+'"><div class="lg">'+logo(a.logo)+'</div><span>'+esc(a.name)+'</span></div>';
+  }).join('');
+  if(S.animate){
+    // Línea de tiempo (s): título → pills → apps caen una a una → caption → ventana → filas del árbol → caption → pie
+    var q=function(sel){return [].slice.call(document.querySelectorAll(sel))};
+    function A(el,name,delay,dur){if(el)el.style.animation=name+' '+(dur||.55)+'s cubic-bezier(.2,.8,.2,1) '+delay.toFixed(2)+'s both'}
+    var t=.1;q('#t span').forEach(function(e,i){A(e,'up',t+i*.25,.6)});
+    q('.pill').forEach(function(e,i){A(e,'pop',.8+i*.12,.5)});
+    var apps=q('.app');apps.forEach(function(e,i){A(e,'drop',1.1+i*.12,.6)});
+    t=1.1+apps.length*.12+.2;A(document.querySelector('.l .cap'),'up',t,.5);
+    t+=.3;A(document.querySelector('.win'),'win',t,.6);t+=.5;
+    q('.rows .row, .rows .kid').forEach(function(e){A(e,'slide',t,.45);
+      [].slice.call(e.querySelectorAll('.tray span')).forEach(function(l,k){A(l,'pop',t+.2+k*.08,.4)});t+=.18});
+    A(document.querySelector('.r .cap'),'up',t+.2,.5);A(document.querySelector('.wrap .footer'),'up',t+.5,.5);
+    window.ANIM_END=t+1.0;
+  }
+  doneAfterImages();
+})();
+</script>

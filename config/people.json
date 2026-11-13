@@ -1,0 +1,6 @@
+{
+  "_note": "People you follow as potential clients (weekly opportunities radar). Max 10 URLs per Apify run.",
+  "people": [
+    {"name": "Jane Doe", "role": "Head of Marketing", "company": "Example SaaS", "sector": "data", "url": "https://www.linkedin.com/in/jane-doe-example/"}
+  ]
+}

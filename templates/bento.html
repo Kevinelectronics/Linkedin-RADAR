@@ -1,0 +1,66 @@
+<!-- Panel «bento» de un sistema (referencia: «The System Behind My Claude Code» de Charlie Hills, data/refs/bento_charlie_system.png).
+Tarjetas de distintos tamaños en una rejilla de 2 columnas; cada una con icono, título, etiqueta de color y un tipo de contenido.
+SPEC: {title, highlight?, subtitle?, accent?,
+       cards: [{title, icon, tag?, color?: "#2f55ff", span?: 1|2, kind: "steps"|"bullets"|"flow"|"stat",
+                items?: [{icon?, text, sub?}]    (steps/bullets; en steps text va en negrita y sub detrás)
+                flow?: ["a","b","c"]             (cadena con flechas)
+                stat?: {value, label}}]}         (cifra grande) -->
+<style>
+#canvas{background:#f4f5f8;color:#141826;padding:48px 44px 32px;background-image:linear-gradient(#e7e9ef 1px,transparent 1px),linear-gradient(90deg,#e7e9ef 1px,transparent 1px);background-size:32px 32px}
+#t{text-align:center;font:800 70px/1.02 var(--display);letter-spacing:-.035em}
+#t em{font-style:normal;color:var(--acc)}
+#s{text-align:center;font:500 25px var(--body);color:#555c70;margin-top:8px}
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:minmax(0,auto);gap:16px;margin-top:22px;align-content:stretch;min-height:0}
+.card{background:#fff;border:1px solid #e2e5ee;border-radius:20px;padding:20px 22px;display:flex;flex-direction:column;justify-content:space-between;gap:14px;box-shadow:0 6px 18px #1a204012;min-width:0}
+.card.w2{grid-column:span 2}
+.hd{display:flex;align-items:center;gap:10px}
+.hd .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 14%,#fff)}
+.hd .ic img{width:24px;height:24px;object-fit:contain}
+.hd b{font:800 25px var(--display);letter-spacing:-.015em}
+.hd .tag{margin-left:auto;font:600 15px var(--body);color:var(--c);background:color-mix(in srgb,var(--c) 12%,#fff);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.steps{display:flex;flex-direction:column;justify-content:space-evenly;flex:1;gap:10px;margin:0;padding:0;list-style:none}
+.steps li{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:baseline;font:500 22px/1.3 var(--body);color:#555c70}
+.steps .n{width:28px;height:28px;border-radius:7px;background:var(--c);color:#fff;font:800 16px var(--mono);display:grid;place-items:center;align-self:center}
+.steps strong{color:#141826;font-weight:700;margin-right:6px}
+.bul{display:flex;flex-direction:column;justify-content:space-evenly;flex:1;gap:12px}
+.bul div{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:center;font:500 22px/1.3 var(--body);color:#2c3245}
+.bul .bi{width:30px;height:30px;display:grid;place-items:center}.bul .bi img{width:28px;height:28px;object-fit:contain}
+.bul .bi.dot:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c)}
+.flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;background:color-mix(in srgb,var(--c) 7%,#fff);border:1px dashed color-mix(in srgb,var(--c) 40%,#fff);border-radius:12px;padding:10px}
+.flow span{font:700 16px var(--mono);background:#fff;border:1px solid #e2e5ee;border-radius:8px;padding:5px 10px}
+.flow i{font-style:normal;color:var(--c);font-weight:800}
+.stat{display:flex;align-items:center;gap:16px}
+.stat b{white-space:nowrap;font:800 64px/1 var(--display);letter-spacing:-.04em;color:var(--c)}
+.stat span{font:600 22px/1.25 var(--body);color:#555c70}
+@keyframes pop{0%{opacity:0;scale:.92;translate:0 20px}100%{opacity:1;scale:1;translate:0 0}}
+@keyframes up{from{opacity:0;translate:0 26px}to{opacity:1;translate:0 0}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+</style>
+<div id="canvas"><h1 id="t"></h1><p id="s"></p><div class="grid" id="g"></div><div id="f"></div></div>
+<script>
+(function(){
+  var S=SPEC,acc=S.accent||'#2f55ff';document.getElementById('canvas').style.setProperty('--acc',acc);
+  var t=esc(S.title||'');if(S.highlight)t=t.replace(esc(S.highlight),'<em>'+esc(S.highlight)+'</em>');
+  document.getElementById('t').innerHTML=t;document.getElementById('s').textContent=S.subtitle||'';
+  var pal=['#2f55ff','#e0703a','#16a36a','#9b4dd8','#d6336c','#0e9bb5'];
+  document.getElementById('g').innerHTML=(S.cards||[]).map(function(c,i){
+    var col=c.color||pal[i%pal.length],body='';
+    if(c.kind==='steps')body='<ol class="steps">'+(c.items||[]).map(function(x,k){return '<li><span class="n">'+(k+1)+'</span><span><strong>'+esc(x.text)+'</strong>'+esc(x.sub||'')+'</span></li>'}).join('')+'</ol>';
+    else if(c.kind==='flow')body='<div class="flow">'+(c.flow||[]).map(function(x){return '<span>'+esc(x)+'</span>'}).join('<i>→</i>')+'</div>'+
+      ((c.items||[]).length?'<div class="bul">'+c.items.map(function(x){return '<div><span class="bi'+(x.icon?'':' dot')+'">'+(x.icon?iconHTML(x.icon):'')+'</span><span>'+esc(x.text)+'</span></div>'}).join('')+'</div>':'');
+    else if(c.kind==='stat')body='<div class="stat"><b>'+esc((c.stat||{}).value||'')+'</b><span>'+esc((c.stat||{}).label||'')+'</span></div>'+
+      ((c.items||[]).length?'<div class="bul">'+c.items.map(function(x){return '<div><span class="bi'+(x.icon?'':' dot')+'">'+(x.icon?iconHTML(x.icon):'')+'</span><span>'+esc(x.text)+'</span></div>'}).join('')+'</div>':'');
+    else body='<div class="bul">'+(c.items||[]).map(function(x){return '<div><span class="bi'+(x.icon?'':' dot')+'">'+(x.icon?iconHTML(x.icon):'')+'</span><span>'+esc(x.text)+'</span></div>'}).join('')+'</div>';
+    return '<div class="card'+(c.span===2?' w2':'')+'" style="--c:'+col+'"><div class="hd"><span class="ic">'+iconHTML(c.icon||'fluent:Sparkles')+'</span><b>'+esc(c.title)+'</b>'+(c.tag?'<span class="tag">'+esc(c.tag)+'</span>':'')+'</div>'+body+'</div>';
+  }).join('');
+  document.getElementById('f').outerHTML=footer(false);
+  if(S.animate){
+    var q=function(s){return [].slice.call(document.querySelectorAll(s))};
+    function A(el,name,delay,dur){if(el)el.style.animation=name+' '+dur+'s cubic-bezier(.2,.8,.2,1) '+delay.toFixed(2)+'s both'}
+    A(document.getElementById('t'),'up',.1,.6);A(document.getElementById('s'),'up',.3,.6);
+    var t0=.7;q('.card').forEach(function(c,i){A(c,'pop',t0,.55);[].slice.call(c.querySelectorAll('.steps li,.bul div,.flow span,.stat')).forEach(function(l,k){A(l,'fade',t0+.35+k*.12,.35)});t0+=.55});
+    A(document.querySelector('.footer'),'up',t0+.3,.5);window.ANIM_END=t0+1.2;
+  }
+  doneAfterImages();
+})();
+</script>

@@ -1,0 +1,3 @@
+{"template":"chart","eyebrow":"LinkedIn data","title":"Median reactions per post","subtitle":"9 creators, last 30 days","footer":"Data: my own LinkedIn radar",
+ "chart":{"type":"bar","labels":["Justin Welsh","midudev","Alex Xu","Charlie Hills","Ruben Hassid","Sam Dunning","Adarsh D."],"datasets":[{"label":"Median reactions","data":[3529,916,992,630,588,31,15]}]},
+ "highlight":0,"source":"Apify scrape of public posts, Oct 2026"}

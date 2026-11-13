@@ -1,0 +1,20 @@
+{
+ "template": "bento",
+ "theme": "plex",
+ "title": "The System Behind My Articles",
+ "highlight": "My Articles",
+ "subtitle": "Same Claude as everyone. The setup is the difference.",
+ "accent": "#2f55ff",
+ "cards": [
+  {"title": "The exact steps for every article", "icon": "fluent:Memo", "tag": "Every piece", "span": 2, "kind": "steps", "color": "#2f55ff", "items": [
+   {"text": "Pick the keyword", "sub": "Real volume and difficulty, never a guess."},
+   {"text": "Read the SERP", "sub": "Who ranks, and which vendors write their own list."},
+   {"text": "Check every price today", "sub": "Official pricing pages, with the date."},
+   {"text": "Draft with my voice skill", "sub": "Claude reads my style rules first."},
+   {"text": "Publish everywhere", "sub": "Web, dev.to and Medium with one canonical."}]},
+  {"title": "CLAUDE.md", "icon": "fluent:Page facing up", "tag": "Every session", "kind": "stat", "color": "#e0703a", "stat": {"value": "1 file", "label": "Claude reads it before anything else"}, "items": [{"text": "My voice and banned words"}, {"text": "Clients I can't contradict"}, {"text": "Every fix becomes a rule"}]},
+  {"title": "Skills", "icon": "fluent:Toolbox", "tag": "When the job fits", "kind": "bullets", "color": "#16a36a", "items": [{"icon": "fluent:Pencil", "text": "article-writer drafts the piece"}, {"icon": "fluent:Chart increasing", "text": "eodhd-content-writer adds real data"}, {"icon": "fluent:Mobile phone", "text": "linkedin-viral-post turns it into a post"}, {"icon": "fluent:Envelope", "text": "b2b-outreach finds the buyer"}]},
+  {"title": "Subagents", "icon": "fluent:Robot", "tag": "One job each", "kind": "flow", "color": "#9b4dd8", "flow": ["research", "pricing", "draft", "review"], "items": [{"text": "Each one gets the full brief"}, {"text": "Results come back, not file dumps"}]},
+  {"title": "MCP", "icon": "fluent:Electric plug", "tag": "Live data", "kind": "bullets", "color": "#0e9bb5", "items": [{"icon": "fav:eodhd.com", "text": "EODHD for market data"}, {"icon": "logo:apify", "text": "Apify for scraping"}, {"icon": "fav:zernio.com", "text": "Zernio to publish on LinkedIn"}, {"icon": "fav:clay.com", "text": "Clay to find who to email"}]}
+ ]
+}

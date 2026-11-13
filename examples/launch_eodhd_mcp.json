@@ -1,0 +1,18 @@
+{
+ "template": "launch",
+ "size": "landscape",
+ "theme": "plex",
+ "brand": {"name": "EODHD APIs", "logo": "fav:eodhd.com", "color": "#e5512b"},
+ "beats": [
+  {"type": "words", "text": "Asking {logo:claude-icon} Claude about {fav:eodhd.com} real market data?"},
+  {"type": "pill", "icon": "fav:eodhd.com", "label": "EODHD APIs MCP"},
+  {"type": "problems", "title": "First, the data", "chips": ["Made-up prices", "Stale numbers", "Splits not adjusted", "Missing tickers", "No source"]},
+  {"type": "brand"},
+  {"type": "toggles", "items": [{"icon": "fluent:Chart increasing", "label": "Prices"}, {"icon": "fluent:Bar chart", "label": "Fundamentals"}, {"icon": "fluent:Newspaper", "label": "News"}]},
+  {"type": "chat", "q": "How did Apple and Tesla do this year?", "a": ["Apple beat Tesla by 44 points.", "{logo:apple} AAPL  $271.12 → $348.51  +28.5%", "{logo:tesla} TSLA  $449.72 → $379.78  −15.6%", "Adjusted closes · Dec 31, 2025 → Nov 10, 2026"]},
+  {"type": "feature", "label": "Prices", "panelTitle": "get_historical_stock_prices", "rows": [{"icon": "logo:apple", "title": "AAPL.US", "sub": "Close $348.51 · Nov 10, 2026", "value": "+28.5%", "tone": "good"}, {"icon": "logo:tesla", "title": "TSLA.US", "sub": "Close $379.78 · Nov 10, 2026", "value": "−15.6%", "tone": "bad"}]},
+  {"type": "code", "title": "One line to connect", "tabs": ["Claude Code", "Cursor", "ChatGPT"], "lines": ["claude mcp add --transport http eodhd \\", "  \"https://mcp.eodhd.com/v1/mcp?apikey=YOUR_KEY\""]},
+  {"type": "words", "dark": true, "text": "Your agent. {fav:eodhd.com} Real market data."},
+  {"type": "end", "title": "EODHD APIs MCP Server", "button": "Connect EODHD APIs to Claude", "sub": "150,000+ tickers · free demo key"}
+ ]
+}

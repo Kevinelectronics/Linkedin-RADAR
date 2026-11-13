@@ -1,0 +1,6 @@
+{
+  "_note": "Companies to watch: their changelog or blog. 'url' = changelog/blog page; the script finds the RSS feed by itself.",
+  "companies": [
+    {"company": "Example API", "url": "https://example.com/changelog", "why": "Prospect: fits my niche"}
+  ]
+}

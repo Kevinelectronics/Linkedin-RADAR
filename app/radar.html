@@ -1,0 +1,702 @@
+<title>Radar Copy Tech</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a scouting board. Sticky header with tabs, a quiet summary strip, then a single column of cards (two on wide screens). */
+:root{
+  --bg:#f3f4f7; --surface:#ffffff; --ink:#151a2b; --muted:#5b6275; --line:#dfe2ea;
+  --accent:#2443b8; --accent-soft:#e6eafb;
+  --good:#1d7a4f; --good-soft:#e2f3ea; --warn:#9a6200; --warn-soft:#fbf0d9; --low:#6b7080; --low-soft:#eceef2;
+  --bad:#b23a3a; --bad-soft:#f8e4e4;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1220; --surface:#171b2c; --ink:#e8eaf2; --muted:#9aa1b5; --line:#2a3046;
+  --accent:#8ea2ff; --accent-soft:#232b4d;
+  --good:#6fd3a0; --good-soft:#163527; --warn:#f0bf5e; --warn-soft:#3a2d12; --low:#a3a8b8; --low-soft:#252a3b;
+  --bad:#f08c8c; --bad-soft:#3d1d22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1220; --surface:#171b2c; --ink:#e8eaf2; --muted:#9aa1b5; --line:#2a3046;
+  --accent:#8ea2ff; --accent-soft:#232b4d;
+  --good:#6fd3a0; --good-soft:#163527; --warn:#f0bf5e; --warn-soft:#3a2d12; --low:#a3a8b8; --low-soft:#252a3b;
+  --bad:#f08c8c; --bad-soft:#3d1d22; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;padding-block:18px 0}
+h1{font-family:var(--display);font-size:clamp(24px,4vw,32px);line-height:1.1;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;font-size:14px}
+.tabs{display:flex;gap:4px;margin-top:14px;overflow-x:auto}
+.tab{white-space:nowrap;appearance:none;border:0;background:none;color:var(--muted);font:600 15px var(--body);padding:10px 14px;border-bottom:3px solid transparent;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+.tab .n{font-family:var(--mono);font-weight:500;font-size:12px;margin-left:6px;color:var(--muted)}
+.tab:focus-visible,button:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.strip{display:flex;flex-wrap:wrap;gap:8px 24px;padding-block:16px;color:var(--muted);font-size:13px}
+.strip b{color:var(--ink);font-family:var(--mono);font-weight:500;font-variant-numeric:tabular-nums}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-bottom:16px}
+.controls label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+select{font:14px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr));gap:14px;padding-bottom:48px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card.liked{border-color:var(--good)}
+.card.saved{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card.hidden-vote{opacity:.55}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);letter-spacing:.02em}
+.chip.plain{background:var(--low-soft);color:var(--low);font-weight:500}
+.chip.alta{background:var(--good-soft);color:var(--good)}
+.chip.media{background:var(--warn-soft);color:var(--warn)}
+.chip.baja{background:var(--low-soft);color:var(--low)}
+.date{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+h2{font-family:var(--display);font-size:19px;line-height:1.25;margin:0;text-wrap:balance}
+.who{font-size:13px;color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.who strong{color:var(--ink);font-weight:600}
+.nums{display:flex;gap:16px;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.nums span b{color:var(--ink);font-weight:500}
+.quote{font-size:14px;color:var(--ink);border-left:2px solid var(--line);padding-left:10px;margin:0;overflow-wrap:anywhere}
+.quote.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.more{appearance:none;border:0;background:none;color:var(--accent);font:500 13px var(--body);padding:0;cursor:pointer;align-self:flex-start}
+.block{font-size:14px}
+.block .lbl{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:2px}
+.block.idea{background:var(--accent-soft);border-radius:8px;padding:10px 12px}
+.block.idea .lbl{color:var(--accent)}
+.actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:4px}
+.btn{appearance:none;font:500 13px var(--body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:6px 10px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{border-color:var(--muted)}
+.btn.link{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn[aria-pressed="true"].v-like{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.btn[aria-pressed="true"].v-save{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.btn[aria-pressed="true"].v-no{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.sched{font-size:14px;background:var(--accent-soft);border-radius:8px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sched.ok{background:var(--good-soft);color:var(--good)}
+.sched.bad{background:var(--bad-soft);color:var(--bad)}
+.sched input{font:14px var(--body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.sched a{color:inherit;font-weight:600}
+.day{grid-column:1/-1;font-family:var(--display);font-size:20px;margin:8px 0 0}
+.dimg{width:100%;height:auto;border-radius:8px;border:1px solid var(--line);background:#fff}
+.dtext{white-space:pre-wrap;font:15px/1.55 var(--body);margin:0;color:var(--ink);overflow-wrap:anywhere}
+.fb{font:14px var(--body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;resize:vertical;width:100%}
+.note a{color:var(--accent)}
+.likes{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:4px 6px;border:1px dashed var(--line);border-radius:8px}
+.lbl-inline{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:0 2px}
+.empty{grid-column:1/-1;background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:32px;text-align:center;color:var(--muted)}
+.empty h3{font-family:var(--display);color:var(--ink);margin:0 0 6px;font-size:18px}
+.note{font-size:12px;color:var(--muted)}
+/* Lanzamientos (captación de SaaS que lanzan funciones) */
+.chip.src-producthunt{background:#ffe6dc;color:#c2410c}.chip.src-linkedin{background:#dbeafe;color:#1d4ed8}
+.chip.src-hackernews{background:#ffedd5;color:#c2410c}.chip.src-changelog{background:var(--low-soft);color:var(--low)}
+.chip.vid{background:var(--good-soft);color:var(--good)}
+/* Formatos (catálogo de tipologías de imagen y vídeo) */
+.fsec{grid-column:1/-1;font-family:var(--display);font-size:24px;margin:10px 0 0}
+.ffam{grid-column:1/-1;font:600 12px var(--body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:4px 0 -4px}
+.fmt .fmedia{width:100%;border-radius:8px;border:1px solid var(--line);background:#fff;aspect-ratio:4/5;object-fit:cover;object-position:top}
+.fmt video.fmedia{aspect-ratio:auto;object-fit:contain;background:#000}
+.fmt .fmedia.wide{aspect-ratio:16/9}
+.fmt .noex{display:grid;place-items:center;aspect-ratio:4/5;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font-size:13px;text-align:center;padding:12px}
+.fmt code{font:12px var(--mono);background:var(--low-soft);border-radius:4px;padding:1px 6px}
+.refs{display:flex;gap:8px;flex-wrap:wrap}
+.ref{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 8px 4px 4px;text-decoration:none;max-width:100%}
+.ref img{width:44px;height:55px;object-fit:cover;object-position:top;border-radius:4px;flex:none}
+.ref b{color:var(--ink);font-weight:600;display:block}
+.chip.svc{background:var(--warn-soft);color:var(--warn)}
+/* Contacto automático (outreach) */
+.outr{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.outr .lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--accent)}
+.outr .ppl{display:flex;flex-direction:column;gap:4px;font-size:14px}
+.outr .ppl a{color:var(--accent)}
+.outr pre{white-space:pre-wrap;font:14px/1.5 var(--body);margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:10px;overflow-wrap:anywhere;max-height:420px;overflow:auto}
+.outr.wait{border-style:dashed;color:var(--muted);font-size:14px}
+.outr.err{border-color:var(--bad);color:var(--bad)}
+.outr.sent{border-color:var(--good)}
+/* Descartadas */
+.rej{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:start}
+.rej img,.rej .noimg{width:96px;height:120px;object-fit:cover;border-radius:6px;border:1px solid var(--line);background:var(--bg)}
+.rej .noimg{display:grid;place-items:center;font-size:11px;color:var(--muted);text-align:center}
+.rej .first{font-weight:600;margin:0;overflow-wrap:anywhere}
+.rej .src{font-size:12px;color:var(--muted)}
+.rej textarea{width:100%}
+@media (max-width:520px){.rej{grid-template-columns:64px minmax(0,1fr)}.rej img,.rej .noimg{width:64px;height:80px}}
+/* Calendario de publicaciones */
+.cal{grid-column:1/-1;display:flex;flex-direction:column;gap:14px;padding-bottom:48px}
+.calbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.calbar h2{font-size:22px;margin:0 8px 0 0;min-width:170px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-left:auto}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--line);gap:1px}
+.dow{background:var(--surface);font:600 11px var(--body);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:8px}
+.cell{background:var(--surface);min-height:112px;padding:6px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.cell.out{background:var(--bg)}.cell.out .dn{opacity:.45}
+.cell.today{box-shadow:inset 0 0 0 2px var(--accent)}
+.dn{font:500 12px var(--mono);color:var(--muted)}
+.cell.today .dn{color:var(--accent);font-weight:600}
+.ev{appearance:none;text-align:left;border:0;border-left:3px solid var(--c);background:var(--cs);color:var(--ink);border-radius:5px;padding:4px 6px;font:12px/1.3 var(--body);cursor:pointer;display:flex;gap:6px;align-items:flex-start;min-width:0;width:100%}
+.ev img{width:30px;height:38px;object-fit:cover;border-radius:3px;flex:none;background:#fff}
+.ev b{font:600 11px var(--mono);display:block;color:var(--c)}
+.ev .sn{font-style:normal}
+.ev span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.st-approved{--c:var(--warn);--cs:var(--warn-soft)}.st-scheduled{--c:var(--accent);--cs:var(--accent-soft)}
+.st-published{--c:var(--good);--cs:var(--good-soft)}.st-failed{--c:var(--bad);--cs:var(--bad-soft)}.st-cancel_requested{--c:var(--low);--cs:var(--low-soft)}
+.agenda{display:flex;flex-direction:column;gap:8px}
+.agenda h3{font-family:var(--display);font-size:18px;margin:6px 0 0}
+.agenda .ev{padding:8px 10px;font-size:14px}.agenda .ev img{width:44px;height:55px}.agenda .ev b{font-size:12px}
+@media (max-width:640px){.cell{min-height:58px;padding:4px}.month .ev img,.month .ev span{display:none}.month .ev{padding:2px 4px}.month .ev b{font-size:10px}.month .ev .sn{display:none}.dow{padding:6px 4px;font-size:10px}}
+@media (prefers-reduced-motion:no-preference){.card{transition:border-color .15s,opacity .15s}}
+</style>
+
+<header>
+  <div class="wrap">
+    <div class="head">
+      <div>
+        <h1>Radar Copy Tech</h1>
+        <p class="sub">Posts de LinkedIn en fintech, APIs, IA y dev tools: qué funciona y quién busca copywriters.</p>
+      </div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-para" aria-selected="true" aria-controls="panel">Para ti<span class="n" id="n-para">0</span></button>
+      <button class="tab" role="tab" id="tab-viral" aria-selected="false" aria-controls="panel">Ideas virales<span class="n" id="n-viral">0</span></button>
+      <button class="tab" role="tab" id="tab-opp" aria-selected="false" aria-controls="panel">Oportunidades<span class="n" id="n-opp">0</span></button>
+      <button class="tab" role="tab" id="tab-cal" aria-selected="false" aria-controls="panel">Calendario<span class="n" id="n-cal">0</span></button>
+      <button class="tab" role="tab" id="tab-rej" aria-selected="false" aria-controls="panel">Descartadas<span class="n" id="n-rej">0</span></button>
+      <button class="tab" role="tab" id="tab-lau" aria-selected="false" aria-controls="panel">Lanzamientos<span class="n" id="n-lau">0</span></button>
+      <button class="tab" role="tab" id="tab-fmt" aria-selected="false" aria-controls="panel">Formatos<span class="n" id="n-fmt">0</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="strip" id="strip"></div>
+  <div class="controls" id="controls"></div>
+  <section class="grid" id="panel" role="tabpanel" aria-live="polite">
+    <div class="empty"><h3>Cargando el radar…</h3><p>Las publicaciones aparecen aquí cuando se conecta la base de datos.</p></div>
+  </section>
+</main>
+
+<script>
+(function(){
+  var state={tab:'para',posts:[],drafts:[],votes:{},outreach:{},formats:[],launches:[],lsrc:'todas',lfit:'todas',niche:'todos',fit:'todas',sort:'eng',hideNo:true,open:{},canWrite:true};
+  try{var t=localStorage.getItem('radar-tab');if(t==='opp'||t==='viral'||t==='para'||t==='cal'||t==='rej'||t==='fmt'||t==='lau')state.tab=t;}catch(e){}
+  state.dfilter='unused';
+  try{var df=localStorage.getItem('radar-df');if(['unused','published','rejected','all'].indexOf(df)>=0)state.dfilter=df;}catch(e){}
+  var db=null,downloads=null;
+  var $=function(id){return document.getElementById(id)};
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function eng(p){return (p.likes||0)+3*(p.comments||0)+2*(p.shares||0)}
+  function fmtDate(d){if(!d)return'';var p=d.split('-');return p[2]+'/'+p[1]}
+  var fitRank={alta:0,media:1,baja:2};
+
+  function setTab(t){state.tab=t;try{localStorage.setItem('radar-tab',t)}catch(e){}render()}
+  $('tab-para').onclick=function(){setTab('para')};
+  $('tab-viral').onclick=function(){setTab('viral')};
+  $('tab-opp').onclick=function(){setTab('opp')};
+  $('tab-cal').onclick=function(){setTab('cal')};
+  $('tab-rej').onclick=function(){setTab('rej')};
+  $('tab-fmt').onclick=function(){setTab('fmt')};
+  $('tab-lau').onclick=function(){setTab('lau')};
+  var calMonth=new Date();calMonth.setDate(1);
+
+  function list(kind){return state.posts.filter(function(p){return p.kind===kind})}
+
+  function renderStrip(){
+    var v=list('viral'),o=list('opp');
+    var votes=Object.keys(state.votes).map(function(k){return state.votes[k].v});
+    var asp={hook:0,texto:0,visual:0};
+    Object.keys(state.votes).forEach(function(k){(state.votes[k].aspects||[]).forEach(function(a){if(a in asp)asp[a]++})});
+    var likes=votes.filter(function(x){return x===1}).length,saves=votes.filter(function(x){return x===2}).length,nos=votes.filter(function(x){return x===-1}).length;
+    var batch=state.posts.reduce(function(m,p){return p.batch>m?p.batch:m},'');
+    var alta=o.filter(function(p){return p.fit==='alta'}).length;
+    $('strip').innerHTML=
+      '<span>Último escaneo <b>'+(batch?esc(fmtDate(batch)):'—')+'</b></span>'+
+      '<span>Ideas <b>'+v.length+'</b></span>'+
+      '<span>Oportunidades <b>'+o.length+'</b> · encaje alto <b>'+alta+'</b></span>'+
+      '<span>Tus votos: me gusta <b>'+likes+'</b> · guardadas <b>'+saves+'</b> · descartadas <b>'+nos+'</b></span>'+
+      '<span>Te gustó: hook <b>'+asp.hook+'</b> · texto <b>'+asp.texto+'</b> · visual <b>'+asp.visual+'</b></span>';
+    $('n-viral').textContent=v.length;$('n-opp').textContent=o.length;
+    $('n-para').textContent=draftsBy('unused').length;
+    $('tab-para').setAttribute('aria-selected',state.tab==='para');
+    $('tab-viral').setAttribute('aria-selected',state.tab==='viral');
+    $('tab-opp').setAttribute('aria-selected',state.tab==='opp');
+    $('tab-cal').setAttribute('aria-selected',state.tab==='cal');
+    $('tab-rej').setAttribute('aria-selected',state.tab==='rej');
+    $('tab-fmt').setAttribute('aria-selected',state.tab==='fmt');
+    $('tab-lau').setAttribute('aria-selected',state.tab==='lau');$('n-lau').textContent=(state.launches||[]).filter(function(x){return x.status!=='descartado'}).length;$('n-fmt').textContent=(state.formats||[]).length;$('n-rej').textContent=draftsBy('rejected').length;
+    var nowK=localKey(new Date());$('n-cal').textContent=calEvents().filter(function(e){return (e.st==='approved'||e.st==='scheduled')&&e.key>=nowK}).length;
+  }
+
+  function renderControls(){
+    var html='';
+    if(state.tab==='lau'){var srcs=[['todas','Todas'],['producthunt','Product Hunt'],['linkedin','LinkedIn'],['changelog','Changelogs'],['hackernews','Hacker News']];
+      $('controls').innerHTML='<label for="f-ls">Fuente <select id="f-ls">'+srcs.map(function(o){return '<option value="'+o[0]+'"'+(state.lsrc===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
+        '<label for="f-lf">Encaje <select id="f-lf">'+['todas','alta','media','baja'].map(function(n){return '<option'+(n===state.lfit?' selected':'')+'>'+n+'</option>'}).join('')+'</select></label>'+
+        '<label for="f-lh"><input type="checkbox" id="f-lh"'+(state.hideNo?' checked':'')+'> Ocultar descartados</label>'+
+        '<span class="note">SaaS y dev tools que acaban de lanzar una función: candidatos para tu vídeo demo (300 €). Se actualiza cada mañana. «Contactar» busca a la persona clave y te prepara el email.</span>';
+      $('f-ls').onchange=function(e){state.lsrc=e.target.value;renderPanel()};$('f-lf').onchange=function(e){state.lfit=e.target.value;renderPanel()};$('f-lh').onchange=function(e){state.hideNo=e.target.checked;renderPanel()};return}
+    if(state.tab==='fmt'){$('controls').innerHTML='<span class="note">Tu catálogo de formatos virales: cada tipología con su plantilla, un ejemplo hecho con tu marca y las referencias que me pasaste. Las «pendientes» son las que aún no tienen plantilla propia. Pásame más ejemplos y los añado aquí.</span>';return}
+    if(state.tab==='rej'){$('controls').innerHTML='<span class="note">Los posts que descartas aquí o en tu calendario global. Cada mañana se sincronizan con el calendario global, para que Claude no te los vuelva a proponer. Escribe el motivo: Claude lo usa para proponerte algo mejor.</span>';return}
+    if(state.tab==='cal'){$('controls').innerHTML='<span class="note">Cada post aprobado aparece aquí al instante en su día y hora. Ámbar: aprobado (Zernio lo recibe en la próxima ejecución, como mucho 1 hora) · Azul: programado en LinkedIn · Verde: publicado. Pulsa uno para ir al post.</span>';return}
+    if(state.tab==='para'){
+      var opts=[['unused','Sin usar'],['published','Publicadas'],['rejected','Descartadas'],['all','Todas']];
+      $('controls').innerHTML='<label for="f-df">Mostrar <select id="f-df">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(state.dfilter===o[0]?' selected':'')+'>'+o[1]+' ('+draftsBy(o[0]).length+')</option>'}).join('')+'</select></label>'+
+        '<span class="note">Cada día a las 7:00 llegan 2 versiones nuevas. Las que no uses se quedan aquí con su fecha. Cuando publiques una, márcala.</span>';
+      $('f-df').onchange=function(e){state.dfilter=e.target.value;try{localStorage.setItem('radar-df',state.dfilter)}catch(err){}renderPanel()};
+      return}
+    if(state.tab==='viral'){
+      var niches=['todos'].concat(Array.from(new Set(list('viral').map(function(p){return p.niche}))).sort());
+      html+='<label for="f-niche">Nicho <select id="f-niche">'+niches.map(function(n){return '<option'+(n===state.niche?' selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select></label>';
+    }else{
+      html+='<label for="f-fit">Encaje <select id="f-fit">'+['todas','alta','media','baja'].map(function(n){return '<option'+(n===state.fit?' selected':'')+'>'+n+'</option>'}).join('')+'</select></label>';
+    }
+    html+='<label for="f-sort">Ordenar <select id="f-sort"><option value="eng"'+(state.sort==='eng'?' selected':'')+'>'+(state.tab==='viral'?'Engagement':'Encaje')+'</option><option value="date"'+(state.sort==='date'?' selected':'')+'>Más recientes</option></select></label>';
+    html+='<label for="f-hide"><input type="checkbox" id="f-hide"'+(state.hideNo?' checked':'')+'> Ocultar descartadas</label>';
+    $('controls').innerHTML=html;
+    var n=$('f-niche');if(n)n.onchange=function(){state.niche=n.value;renderPanel()};
+    var f=$('f-fit');if(f)f.onchange=function(){state.fit=f.value;renderPanel()};
+    $('f-sort').onchange=function(e){state.sort=e.target.value;renderPanel()};
+    $('f-hide').onchange=function(e){state.hideNo=e.target.checked;renderPanel()};
+  }
+
+  function voteBtns(id,kind){
+    var v=(state.votes[id]||{}).v||0, dis=state.canWrite?'':' disabled';
+    if(kind==='viral'){
+      var asp=(state.votes[id]||{}).aspects||[];
+      var chip=function(k,l){return '<button class="btn v-like" data-id="'+id+'" data-asp="'+k+'" aria-pressed="'+(asp.indexOf(k)>=0)+'"'+dis+'>'+l+'</button>'};
+      return '<div class="likes"><span class="lbl-inline">Me gusta</span>'+chip('hook','El hook')+chip('texto','El texto')+chip('visual','Lo visual')+'</div>'+
+             '<button class="btn v-save" data-id="'+id+'" data-v="2" aria-pressed="'+(v===2)+'"'+dis+'>Guardar idea</button>'+
+             '<button class="btn v-no" data-id="'+id+'" data-v="-1" aria-pressed="'+(v===-1)+'"'+dis+'>No me interesa</button>';
+    }
+    var labels=kind==='viral'?['Me gusta','Guardar idea','No me interesa']:['Interesante','Contactar','Descartar'];
+    var html='<button class="btn v-like" data-id="'+id+'" data-v="1" aria-pressed="'+(v===1)+'"'+dis+'>'+labels[0]+'</button>'+
+           '<button class="btn v-save" data-id="'+id+'" data-v="2" aria-pressed="'+(v===2)+'"'+dis+'>'+labels[1]+'</button>'+
+           '<button class="btn v-no" data-id="'+id+'" data-v="-1" aria-pressed="'+(v===-1)+'"'+dis+'>'+labels[2]+'</button>';
+    if(v!==0){
+      var rs=(state.votes[id]||{}).reasons||[];
+      var opts=v>0?[['nicho','Mi nicho'],['remoto','Freelance / remoto'],['empresa','Buena empresa'],['decisor','Habla quien decide']]
+                  :[['busca-trabajo','No contrata (busca trabajo)'],['no-nicho','No es mi nicho'],['presencial','Presencial'],['full-time','Tiempo completo'],['spam','Agregador / spam']];
+      html+='<div class="likes"><span class="lbl-inline">'+(v>0?'¿Por qué?':'¿Por qué no?')+'</span>'+opts.map(function(o){
+        return '<button class="btn '+(v>0?'v-like':'v-no')+'" data-id="'+id+'" data-reason="'+o[0]+'" aria-pressed="'+(rs.indexOf(o[0])>=0)+'"'+dis+'>'+o[1]+'</button>'}).join('')+'</div>';
+    }
+    return html;
+  }
+
+  function quote(p){
+    var open=state.open[p.id];
+    return '<p class="quote'+(open?'':' clamp')+'">'+esc(p.text)+'</p>'+
+      ((p.text||'').length>220?'<button class="more" data-more="'+p.id+'">'+(open?'Ver menos':'Leer extracto completo')+'</button>':'');
+  }
+
+  function cardViral(p){
+    var vd=state.votes[p.id]||{},v=vd.v||0;
+    if(v===0&&(vd.aspects||[]).length)v=1;
+    return '<article class="card'+(v===1?' liked':v===2?' saved':v===-1?' hidden-vote':'')+'">'+
+      '<div class="meta"><span class="chip">'+esc(p.niche)+'</span><span class="chip plain">'+esc(p.hookType)+'</span><span class="chip plain">'+esc(p.format)+'</span><span class="date">'+fmtDate(p.date)+'</span></div>'+
+      '<div class="who"><strong>'+esc(p.author)+'</strong> · '+esc(p.headline)+'</div>'+
+      '<div class="nums"><span><b>'+p.likes+'</b> reacciones</span><span><b>'+p.comments+'</b> comentarios</span><span><b>'+p.shares+'</b> compartidos</span></div>'+
+      quote(p)+
+      '<div class="block"><span class="lbl">Por qué funciona</span>'+esc(p.why)+'</div>'+
+      '<div class="block idea"><span class="lbl">Cómo replicarlo</span>'+esc(p.idea)+'</div>'+
+      '<div class="actions"><a class="btn link" href="'+esc(p.url)+'" target="_blank" rel="noopener">Ver en LinkedIn ↗</a>'+voteBtns(p.id,'viral')+'</div>'+
+    '</article>';
+  }
+
+  // ---- Contacto automático: «Contactar» crea outreach/<id> (state "requested"); la tarea radar-contactar busca en Clay
+  // a la persona clave, redacta el email y lo deja aquí (state "ready"). Kevin lo copia y lo envía él.
+  function outreachBlock(p){
+    var o=state.outreach[p.id];if(!o)return '';
+    var dis=state.canWrite?'':' disabled';
+    if(o.state==='requested')return '<div class="outr wait">Buscando a la persona clave y redactando el email… Estará aquí en unos 5–10 minutos (lo hace la tarea «radar-contactar», de 8:00 a 23:00).</div>';
+    if(o.state==='error')return '<div class="outr err">No se pudo preparar el contacto: '+esc(o.error||'error desconocido')+' <button class="btn" data-outretry="'+esc(p.id)+'"'+dis+'>Reintentar</button></div>';
+    var c=o.contacts||[];
+    var ppl=c.map(function(x,i){return '<div>'+(i===0?'<b>Persona clave:</b> ':'<b>Alternativa:</b> ')+esc(x.name||'')+(x.title?' · '+esc(x.title):'')+
+      (x.email?' · <code>'+esc(x.email)+'</code>':' · sin email')+(x.linkedin&&/^https:\/\//.test(x.linkedin)?' · <a href="'+esc(x.linkedin)+'" target="_blank" rel="noopener">LinkedIn ↗</a>':'')+(x.why?'<div class="note">'+esc(x.why)+'</div>':'')+'</div>'}).join('');
+    return '<div class="outr'+(o.state==='sent'?' sent':'')+'"><span class="lbl">'+(o.state==='sent'?'Email enviado el '+esc(fmtFull(o.sentAt)):'Email listo para enviar')+'</span>'+
+      '<div class="ppl">'+ppl+'</div>'+(o.warning?'<div class="note" style="color:var(--warn)">⚠ '+esc(o.warning)+'</div>':'')+
+      '<div><b>Para:</b> '+esc((c[0]||{}).email||'')+'<br><b>Asunto:</b> '+esc(o.subject||'')+'</div>'+
+      '<pre id="ob-'+esc(p.id)+'">'+esc(o.body||'')+'</pre>'+
+      '<div class="actions"><button class="btn link" data-outcopy="'+esc(p.id)+'">Copiar email</button>'+
+      (o.state!=='sent'?'<button class="btn" data-outsent="'+esc(p.id)+'"'+dis+'>Marcar como enviado</button>':'')+
+      '<button class="btn" data-outretry="'+esc(p.id)+'"'+dis+'>Rehacer</button></div></div>';
+  }
+
+  function cardOpp(p){
+    var v=(state.votes[p.id]||{}).v||0;
+    return '<article class="card'+(v===1?' liked':v===2?' saved':v===-1?' hidden-vote':'')+'">'+
+      '<div class="meta"><span class="chip '+esc(p.fit)+'">Encaje '+esc(p.fit)+(p.score!=null?' · '+esc(p.score):'')+'</span>'+(p.signal?'<span class="chip">'+esc(p.signal)+'</span>':'')+(p.competition!=null?'<span class="chip plain">'+esc(p.competition)+' writers en comentarios</span>':'')+'<span class="chip plain">'+esc((p.lang||'').toUpperCase())+'</span><span class="date">'+fmtDate(p.date)+'</span></div>'+
+      '<h2>'+esc(p.role)+'</h2>'+
+      '<div class="who"><strong>'+esc(p.company)+'</strong><br>Publicado por '+esc(p.author)+' · '+esc(p.headline)+'</div>'+
+      '<div class="block"><span class="lbl">Por qué te interesa</span>'+esc(p.why)+'</div>'+
+      '<div class="block idea"><span class="lbl">Cómo venderle</span>'+esc(p.angle)+'</div>'+
+      quote(p)+outreachBlock(p)+
+      '<div class="actions"><a class="btn link" href="'+esc(p.url)+'" target="_blank" rel="noopener">Ver post ↗</a>'+voteBtns(p.id,'opp')+'</div>'+
+    '</article>';
+  }
+
+  function fmtFull(d){if(!d)return'';var p=String(d).slice(0,10).split('-');return p[2]+'/'+p[1]+'/'+p[0]}
+  function isUsed(x){return (x.status||'pending')==='published'}
+  function draftsBy(f){return state.drafts.filter(function(x){var st=x.status||'pending';
+    if(f==='published')return st==='published';if(f==='rejected')return st==='rejected';if(f==='all')return true;
+    return st!=='published'&&st!=='rejected'})}
+
+  // Publicación vía Zernio: el radar solo guarda la aprobación; la tarea "linkedin-publicar" la envía a Zernio.
+  function fmtWhen(s){if(!s)return'';var d=new Date(s);if(isNaN(d))return esc(s);
+    return d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}
+  function defaultAt(){var d=new Date();d.setDate(d.getDate()+1);d.setHours(9,0,0,0);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'T09:00'}
+  function schedBlock(x,dis){
+    var L=x.linkedin||{},s=L.state;
+    if(s==='published')return '<div class="sched ok">Publicado en LinkedIn '+fmtWhen(L.publishedAt||L.at)+(L.url?' · <a href="'+esc(L.url)+'" target="_blank" rel="noopener">Ver post ↗</a>':'')+'</div>';
+    if(s==='approved'&&L.now)return '<div class="sched">Aprobado para publicar ya: saldrá en la próxima ejecución (como mucho en 1 hora). <button class="btn v-no" data-unsched="'+esc(x.id)+'"'+dis+'>Cancelar</button></div>';
+    if(s==='approved')return '<div class="sched">Aprobado para '+fmtWhen(L.at)+'. Se enviará a Zernio en la próxima ejecución. <button class="btn v-no" data-unsched="'+esc(x.id)+'"'+dis+'>Cancelar</button></div>';
+    if(s==='scheduled')return '<div class="sched ok">Programado en LinkedIn para '+fmtWhen(L.at)+'. <button class="btn v-no" data-unsched="'+esc(x.id)+'"'+dis+'>Cancelar publicación</button></div>';
+    if(s==='cancel_requested')return '<div class="sched">Cancelación solicitada: se retirará de Zernio en la próxima ejecución.</div>';
+    var fail=s==='failed'?'<div class="sched bad">No se pudo publicar: '+esc(L.error||'error desconocido')+'</div>':'';
+    var gap=/\[(tu |@|fundador)|\[[^\]]*aquí/i.test(x.text||'');
+    return fail+'<div class="sched"><label for="at-'+esc(x.id)+'">Publicar en LinkedIn el</label> '+
+      '<input type="datetime-local" id="at-'+esc(x.id)+'" value="'+esc(L.at||defaultAt())+'"'+dis+'> '+
+      '<button class="btn link" data-sched="'+esc(x.id)+'"'+(dis||(gap?' disabled title="Rellena los huecos [ ] del texto antes de programar"':''))+'>'+(s==='failed'?'Reintentar':'Aprobar y programar')+'</button>'+
+      '<button class="btn" data-now="'+esc(x.id)+'"'+(dis||(gap?' disabled':''))+' title="Se publica en la próxima ejecución (como mucho en 1 hora, entre 7:15 y 22:15)">Publicar ahora</button>'+
+      (gap?'<div class="note">Bloqueado: el texto tiene un hueco sin rellenar, <b>'+esc((String(x.text||'').match(/\[[^\]]*\]/)||[''])[0])+'</b>. Pulsa «Editar texto» y rellénalo o bórralo (si dice «opcional», puedes quitarlo).</div>':'')+'</div>';
+  }
+
+  function cardDraft(x){
+    var st=x.status||'pending',dis=state.canWrite?'':' disabled';
+    var ins=x.inspiredBy||{};
+    var ageDays=Math.floor((Date.now()-new Date(x.date+'T00:00:00').getTime())/86400000);
+    return '<article id="card-'+esc(x.id)+'" class="card draft'+(st==='chosen'?' saved':st==='rejected'||st==='not_chosen'?' hidden-vote':'')+'">'+
+      '<div class="meta"><span class="chip">Versión '+esc(x.variant)+'</span><span class="chip plain">'+esc(x.pattern||'')+'</span><span class="chip plain">'+esc((x.lang||'en').toUpperCase())+'</span>'+
+        (st==='chosen'?'<span class="chip alta">Elegida</span>':st==='rejected'?'<span class="chip baja">Descartada</span>':'')+
+        (st==='published'?'<span class="chip alta">Publicada el '+esc(fmtFull(x.publishedAt))+'</span>':'')+
+        '<span class="date">Creada el '+esc(fmtFull(x.date))+(st!=='published'&&ageDays>0?' · hace '+ageDays+' d':'')+'</span></div>'+
+      (x.videoUrl?'<video class="dimg" src="'+esc(x.videoUrl)+'"'+(x.imageUrl?' poster="'+esc(x.imageUrl)+'"':'')+' controls loop playsinline preload="metadata" aria-label="Vídeo del post: '+esc(x.imageAlt||x.pattern||'')+'"></video>'
+        :x.imageUrl?'<img class="dimg" src="'+esc(x.imageUrl)+'" alt="Imagen del post: '+esc(x.imageAlt||x.pattern||'')+'">':'')+
+      (state.open['ed-'+x.id]
+        ?'<textarea class="fb" rows="14" id="ed-'+esc(x.id)+'">'+esc(x.text)+'</textarea><div class="actions"><button class="btn link" data-save="'+esc(x.id)+'">Guardar texto</button><button class="btn" data-edit="'+esc(x.id)+'">Cancelar</button><span class="note">Usa **así** para negrita.</span></div>'
+        :'<pre class="dtext" id="dt-'+esc(x.id)+'">'+esc(toLinkedIn(x.text))+'</pre>'+((x.linkedin||{}).state==='scheduled'||(x.linkedin||{}).state==='published'?'':'<button class="more" data-edit="'+esc(x.id)+'">Editar texto</button>'))+
+      (ins.author?'<div class="note">Inspirado en '+(ins.url?'<a href="'+esc(ins.url)+'" target="_blank" rel="noopener">'+esc(ins.author)+'</a>':esc(ins.author))+(ins.why?' · '+esc(ins.why):'')+'</div>':'')+
+      schedBlock(x,dis)+
+      '<label class="note" for="fb-'+esc(x.id)+'">¿Qué cambiarías? (opcional)</label>'+
+      '<textarea id="fb-'+esc(x.id)+'" class="fb" rows="2" data-fb="'+esc(x.id)+'"'+dis+'>'+esc(x.feedback||'')+'</textarea>'+
+      '<div class="actions">'+
+        '<button class="btn link" data-pub="'+esc(x.id)+'"'+dis+'>'+(st==='published'?'Desmarcar publicada':'Marcar como publicada')+'</button>'+
+        '<button class="btn v-save" data-draft="'+esc(x.id)+'" data-st="chosen" aria-pressed="'+(st==='chosen')+'"'+dis+'>Elegir esta</button>'+
+        '<button class="btn v-no" data-draft="'+esc(x.id)+'" data-st="rejected" aria-pressed="'+(st==='rejected')+'"'+dis+'>No me gusta</button>'+
+        '<button class="btn" data-copy="'+esc(x.id)+'">Copiar para LinkedIn</button>'+
+        (x.imageUrl&&downloads?'<button class="btn" data-dl="'+esc(x.id)+'">Descargar imagen</button>':'')+
+        (x.pdfUrl&&downloads?'<button class="btn" data-dlpdf="'+esc(x.id)+'">Descargar carrusel (PDF)</button>':'')+
+        (x.videoUrl&&downloads?'<button class="btn" data-dlvid="'+esc(x.id)+'">Descargar vídeo</button>':'')+
+      '</div></article>';
+  }
+
+  // ---- Calendario: se alimenta de drafts.linkedin (lo que escribe «Aprobar y programar») y de los marcados como publicados
+  function dayKey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+  // Las horas de LinkedIn se guardan en hora de Madrid: el calendario las muestra siempre en esa zona
+  function localKey(d){try{var o={};new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Madrid',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(d).forEach(function(x){o[x.type]=x.value});return o.year+'-'+o.month+'-'+o.day+'T'+o.hour+':'+o.minute}catch(e){return dayKey(d)}}
+  function calEvents(){
+    var out=[];
+    state.drafts.forEach(function(x){
+      var L=x.linkedin||{},st=L.state,key=null;
+      if(st==='approved'||st==='scheduled'||st==='failed'||st==='cancel_requested')key=L.at;
+      else if(st==='published'){var pa=L.publishedAt?new Date(L.publishedAt):null;key=pa&&!isNaN(pa)?localKey(pa):L.at}
+      else if((x.status||'')==='published'&&x.publishedAt){var ps=String(x.publishedAt);key=ps.length>10?localKey(new Date(ps)):ps.slice(0,10);st='published'}
+      if(!key)return;
+      var title=String(x.text||'').split('\n').filter(function(l){return l.trim()})[0]||x.pattern||x.id;
+      out.push({id:x.id,key:String(key).slice(0,16),day:String(key).slice(0,10),time:String(key).slice(11,16),st:st,title:title.replace(/\*\*/g,''),img:x.imageUrl,video:!!x.videoUrl,pdf:!!x.pdfUrl});
+    });
+    return out.sort(function(a,b){return a.key.localeCompare(b.key)});
+  }
+  var stName={approved:'Aprobado',scheduled:'Programado',published:'Publicado',failed:'Falló',cancel_requested:'Cancelando'};
+  function evHTML(e){
+    var kind=e.video?' · vídeo':e.pdf?' · carrusel':'';
+    return '<button class="ev st-'+e.st+'" data-goto="'+esc(e.id)+'" title="'+esc(stName[e.st]+' · '+e.title)+'">'+(e.img?'<img src="'+esc(e.img)+'" alt="">':'')+
+      '<div style="min-width:0"><b>'+esc(e.time||'•')+'<i class="sn"> '+esc(stName[e.st]+kind)+'</i></b><span>'+esc(e.title)+'</span></div></button>'}
+  function renderCal(){
+    var evs=calEvents(),byDay={};evs.forEach(function(e){(byDay[e.day]=byDay[e.day]||[]).push(e)});
+    var y=calMonth.getFullYear(),m=calMonth.getMonth(),first=new Date(y,m,1),start=new Date(y,m,1-((first.getDay()+6)%7));
+    var nowKey=localKey(new Date()),today=nowKey.slice(0,10),cells='';
+    for(var i=0;i<42;i++){var d=new Date(start);d.setDate(start.getDate()+i);var k=dayKey(d).slice(0,10);
+      if(i===35&&d.getMonth()!==m)break;
+      cells+='<div class="cell'+(d.getMonth()!==m?' out':'')+(k===today?' today':'')+'"><span class="dn">'+d.getDate()+'</span>'+(byDay[k]||[]).map(evHTML).join('')+'</div>'}
+    var up=evs.filter(function(e){return e.key>=nowKey.slice(0,e.key.length)&&e.st!=='published'}),agenda={};
+    up.forEach(function(e){(agenda[e.day]=agenda[e.day]||[]).push(e)});
+    $('panel').innerHTML='<div class="cal"><div class="calbar"><button class="btn" data-cal="-1" aria-label="Mes anterior">‹</button><h2>'+
+      esc((function(t){return t.charAt(0).toUpperCase()+t.slice(1)})(first.toLocaleDateString('es-ES',{month:'long',year:'numeric'})))+'</h2><button class="btn" data-cal="1" aria-label="Mes siguiente">›</button><button class="btn" data-cal="0">Hoy</button>'+
+      '<div class="legend"><span><i style="background:var(--warn)"></i>Aprobado</span><span><i style="background:var(--accent)"></i>Programado</span><span><i style="background:var(--good)"></i>Publicado</span><span><i style="background:var(--bad)"></i>Falló</span></div></div>'+
+      '<div class="month">'+['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(function(d){return '<div class="dow">'+d+'</div>'}).join('')+cells+'</div>'+
+      '<div class="agenda"><h3>Próximas publicaciones</h3>'+(up.length?Object.keys(agenda).map(function(k){
+        return '<div class="note">'+esc(new Date(k+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))+'</div>'+agenda[k].map(evHTML).join('')}).join('')
+        :'<p class="note">Nada programado. Pulsa «Aprobar y programar» en un post de «Para ti» y aparecerá aquí.</p>')+'</div></div>';
+  }
+
+  // ---- Descartadas: drafts con status "rejected" (desde el radar o, vía la sincronización diaria, desde el calendario global)
+  // ---- Lanzamientos: colección launches (la llena la tarea radar-lanzamientos cada mañana)
+  function renderLaunches(){
+    var rank={alta:0,media:1,baja:2},srcName={producthunt:'Product Hunt',linkedin:'LinkedIn',hackernews:'Hacker News',changelog:'Changelog'};
+    var L=(state.launches||[]).filter(function(x){return (state.lsrc==='todas'||x.source===state.lsrc)&&(state.lfit==='todas'||x.fit===state.lfit)&&!(state.hideNo&&x.status==='descartado')})
+      .sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))||((rank[a.fit]||3)-(rank[b.fit]||3))});
+    var dis=state.canWrite?'':' disabled';
+    if(!L.length){$('panel').innerHTML='<div class="empty"><h3>Aún no hay lanzamientos</h3><p>La tarea «radar-lanzamientos» los busca cada mañana en Product Hunt, LinkedIn, Hacker News y los changelogs de tu lista.</p></div>';return}
+    $('panel').innerHTML=L.map(function(p){
+      var o=state.outreach[p.id];
+      return '<article class="card'+(p.status==='descartado'?' hidden-vote':o?' saved':'')+'"><div class="meta"><span class="chip '+esc(p.fit||'baja')+'">Encaje '+esc(p.fit||'?')+(p.score!=null?' · '+esc(p.score):'')+'</span><span class="chip src-'+esc(p.source)+'">'+esc(srcName[p.source]||p.source)+'</span>'+
+        (p.hasVideo?'<span class="chip vid">Ya publica vídeos</span>':'')+'<span class="date">'+fmtDate(String(p.date||'').slice(0,10))+'</span></div>'+
+        '<h2>'+esc(p.feature||p.title)+'</h2><div class="who"><strong>'+esc(p.company||'')+'</strong>'+(p.companyInfo?' · '+esc(p.companyInfo):'')+'</div>'+
+        (p.contact?'<div class="who">Contacto: '+(p.contact.linkedin?'<a href="'+esc(p.contact.linkedin)+'" target="_blank" rel="noopener">'+esc(p.contact.name||'LinkedIn')+' ↗</a>':esc(p.contact.name||''))+(p.contact.role?' · '+esc(p.contact.role):'')+'</div>':'')+
+        (p.why?'<div class="block"><span class="lbl">Por qué encaja</span>'+esc(p.why)+'</div>':'')+
+        (p.angle?'<div class="block idea"><span class="lbl">Vídeo que le propondría</span>'+esc(p.angle)+'</div>':'')+
+        outreachBlock(p)+
+        '<div class="actions"><a class="btn link" href="'+esc(p.url)+'" target="_blank" rel="noopener">Ver lanzamiento ↗</a>'+
+        '<button class="btn v-save" data-lcontact="'+esc(p.id)+'" aria-pressed="'+(!!o)+'"'+dis+'>Contactar</button>'+
+        '<button class="btn v-no" data-ldiscard="'+esc(p.id)+'" aria-pressed="'+(p.status==='descartado')+'"'+dis+'>'+(p.status==='descartado'?'Recuperar':'Descartar')+'</button></div></article>';
+    }).join('');
+  }
+
+  // ---- Formatos: catálogo de tipologías (colección formats; lo mantiene Claude)
+  function renderFormats(){
+    var F=(state.formats||[]).slice().sort(function(a,b){return (a.kind===b.kind?0:a.kind==='image'?-1:1)||((a.order||0)-(b.order||0))});
+    if(!F.length){$('panel').innerHTML='<div class="empty"><h3>Aún no hay formatos</h3><p>Claude añade aquí cada tipología de imagen o vídeo con su plantilla y ejemplos.</p></div>';return}
+    var stName={lista:'Plantilla lista',parcial:'Parcial',pendiente:'Pendiente'},stCls={lista:'alta',parcial:'media',pendiente:'baja'};
+    var html='',kind='',fam='';
+    F.forEach(function(f){
+      if(f.kind!==kind){kind=f.kind;fam='';html+='<h3 class="fsec">'+(kind==='video'?'Vídeos':'Imágenes')+'</h3>'}
+      if(f.family!==fam){fam=f.family;html+='<div class="ffam">'+esc(fam||'')+'</div>'}
+      var media=f.exampleVideo?'<video class="fmedia'+(f.kind==='video'&&f.template==='demo'?' wide':'')+'" src="'+esc(f.exampleVideo)+'"'+(f.example?' poster="'+esc(f.example)+'"':'')+' controls loop playsinline preload="none"></video>'
+        :f.example?'<img class="fmedia" src="'+esc(f.example)+'" alt="Ejemplo: '+esc(f.name)+'" loading="lazy">'
+        :'<div class="noex">Sin ejemplo todavía<br>(plantilla pendiente)</div>';
+      var refs=(f.refs||[]).map(function(r){var href=r.url&&/^https:\/\//.test(r.url)?r.url:(r.video||r.img||'');
+        return '<a class="ref"'+(href?' href="'+esc(href)+'" target="_blank" rel="noopener"':'')+'>'+(r.img?'<img src="'+esc(r.img)+'" alt="" loading="lazy">':'')+'<span><b>'+esc(r.author||'')+'</b>'+esc(r.note||'')+'</span></a>'}).join('');
+      html+='<article class="card fmt"><div class="meta"><span class="chip '+(stCls[f.status]||'plain')+'">'+esc(stName[f.status]||f.status||'')+'</span>'+(f.service?'<span class="chip svc">Servicio para clientes</span>':'')+
+        (f.template?'<span class="date"><code>'+esc(f.template)+'</code></span>':'')+'</div>'+
+        '<h2>'+esc(f.name)+'</h2>'+media+'<div class="block"><span class="lbl">Cuándo usarla</span>'+esc(f.when||'')+'</div>'+
+        (refs?'<div class="block"><span class="lbl">Referencias</span><div class="refs">'+refs+'</div></div>':'')+'</article>';
+    });
+    $('panel').innerHTML=html;
+  }
+
+  function renderRejected(){
+    var list=draftsBy('rejected').sort(function(a,b){return String(b.discardedAt||b.decidedAt||b.date).localeCompare(String(a.discardedAt||a.decidedAt||a.date))});
+    var dis=state.canWrite?'':' disabled';
+    if(!list.length){$('panel').innerHTML='<div class="empty"><h3>No has descartado ningún post</h3><p>Cuando pulses «No me gusta» en un post de «Para ti», o lo descartes en tu calendario global, aparecerá aquí con su motivo.</p></div>';return}
+    $('panel').innerHTML=list.map(function(x){
+      var first=String(x.text||'').split('\n').filter(function(l){return l.trim()})[0]||x.pattern||x.id;
+      var when=x.discardedAt||x.decidedAt;
+      var src=x.discardSource==='calendario'?'Descartado en el calendario global':'Descartado en el radar';
+      var synced=x.calendarItemId?' · sincronizado con el calendario':' · se sincroniza mañana con el calendario';
+      return '<article class="card"><div class="rej">'+
+        (x.imageUrl?'<img src="'+esc(x.imageUrl)+'" alt="">':'<div class="noimg">Sin imagen</div>')+
+        '<div style="display:flex;flex-direction:column;gap:8px;min-width:0">'+
+          '<div class="meta"><span class="chip baja">Descartada</span><span class="chip plain">'+esc(x.pattern||'')+'</span><span class="date">Creada el '+esc(fmtFull(x.date))+(when?' · descartada el '+esc(fmtFull(String(when).slice(0,10))):'')+'</span></div>'+
+          '<p class="first">'+esc(toLinkedIn(first.replace(/\*\*/g,'')))+'</p>'+
+          '<div class="src">'+esc(src+synced)+'</div>'+
+          '<label class="note" for="rr-'+esc(x.id)+'">Motivo del descarte</label>'+
+          '<textarea class="fb" rows="2" id="rr-'+esc(x.id)+'" data-rreason="'+esc(x.id)+'" placeholder="Ej.: tema repetido, no es mi nicho, el hook no me convence…"'+dis+'>'+esc(x.discardReason||x.feedback||'')+'</textarea>'+
+          '<div class="actions"><button class="btn link" data-recover="'+esc(x.id)+'"'+dis+'>Recuperar</button><button class="btn" data-goto="'+esc(x.id)+'" data-goto-filter="rejected">Ver el post completo</button></div>'+
+        '</div></div></article>'}).join('');
+  }
+
+  function renderDrafts(){
+    var panel=$('panel');
+    if(!state.drafts.length){panel.innerHTML='<div class="empty"><h3>Aún no hay posts para ti</h3><p>Cada mañana a las 7:00 aparecen aquí 2 versiones de un post con su imagen.</p></div>';return}
+    var list=draftsBy(state.dfilter);
+    if(!list.length){panel.innerHTML='<div class="empty"><h3>Nada en esta vista</h3><p>'+(state.dfilter==='published'?'Cuando publiques una idea, pulsa «Marcar como publicada» y aparecerá aquí con su fecha.':'Cambia el filtro de arriba para ver el resto.')+'</p></div>';return}
+    var key=state.dfilter==='published'?function(x){return String(x.publishedAt||'').slice(0,10)}:function(x){return x.date};
+    var byDate={};list.forEach(function(x){(byDate[key(x)]=byDate[key(x)]||[]).push(x)});
+    panel.innerHTML=Object.keys(byDate).sort().reverse().map(function(dt){
+      var xs=byDate[dt].sort(function(a,b){return (a.variant||'').localeCompare(b.variant||'')});
+      return '<h3 class="day">'+(state.dfilter==='published'?'Publicadas el ':'Creadas el ')+esc(fmtFull(dt))+'</h3>'+xs.map(cardDraft).join('');
+    }).join('');
+  }
+
+  function renderPanel(){
+    if(state.tab==='para')return renderDrafts();
+    if(state.tab==='cal')return renderCal();
+    if(state.tab==='rej')return renderRejected();
+    if(state.tab==='fmt')return renderFormats();
+    if(state.tab==='lau')return renderLaunches();
+    var items=list(state.tab);
+    if(state.tab==='viral'&&state.niche!=='todos')items=items.filter(function(p){return p.niche===state.niche});
+    if(state.tab==='opp'&&state.fit!=='todas')items=items.filter(function(p){return p.fit===state.fit});
+    if(state.hideNo)items=items.filter(function(p){return (state.votes[p.id]||{}).v!==-1});
+    items.sort(function(a,b){
+      if(state.sort==='date')return (b.date||'').localeCompare(a.date||'');
+      if(state.tab==='opp')return (fitRank[a.fit]-fitRank[b.fit])||((b.date||'').localeCompare(a.date||''));
+      return eng(b)-eng(a);
+    });
+    var panel=$('panel');
+    if(!state.posts.length){
+      panel.innerHTML='<div class="empty"><h3>Todavía no hay publicaciones</h3><p>El escaneo diario de LinkedIn las añade aquí. Pídele a Claude «actualiza el radar» para lanzar uno ahora.</p></div>';
+      return;
+    }
+    if(!items.length){panel.innerHTML='<div class="empty"><h3>Nada con estos filtros</h3><p>Cambia el nicho o el encaje, o desmarca «Ocultar descartadas».</p></div>';return}
+    panel.innerHTML=items.map(state.tab==='viral'?cardViral:cardOpp).join('');
+  }
+
+  function render(){renderStrip();renderControls();renderPanel()}
+
+  $('panel').addEventListener('click',function(e){
+    var m=e.target.closest('[data-more]');
+    if(m){var id=m.getAttribute('data-more');state.open[id]=!state.open[id];renderPanel();return}
+    var cn=e.target.closest('[data-cal]');
+    if(cn){var dd=Number(cn.getAttribute('data-cal'));if(dd===0){calMonth=new Date();calMonth.setDate(1)}else calMonth.setMonth(calMonth.getMonth()+dd);renderPanel();return}
+    var go=e.target.closest('[data-goto]');
+    if(go){var gid=go.getAttribute('data-goto');state.dfilter=go.getAttribute('data-goto-filter')||'all';setTab('para');
+      setTimeout(function(){var c=$('card-'+gid);if(c){c.scrollIntoView({behavior:'smooth',block:'start'});c.style.boxShadow='0 0 0 2px var(--accent)'}},50);return}
+    var lc=e.target.closest('button[data-lcontact]');
+    if(lc&&db){var lid=lc.getAttribute('data-lcontact'),lp=(state.launches||[]).find(function(x){return x.id===lid})||{};
+      if(!state.outreach[lid]||state.outreach[lid].state==='error')db.doc('outreach/'+lid).set({state:'requested',requestedAt:new Date().toISOString(),postId:lid,company:lp.company||'',kind:'launch'}).catch(function(){});
+      db.doc('launches/'+lid).update({status:'contactar',decidedAt:new Date().toISOString()}).catch(function(){});return}
+    var ld=e.target.closest('button[data-ldiscard]');
+    if(ld&&db){var did2=ld.getAttribute('data-ldiscard'),lx=(state.launches||[]).find(function(x){return x.id===did2})||{};
+      db.doc('launches/'+did2).update({status:lx.status==='descartado'?'nuevo':'descartado',decidedAt:new Date().toISOString()}).catch(function(){});return}
+    var oc=e.target.closest('button[data-outcopy]');
+    if(oc){var oo=state.outreach[oc.getAttribute('data-outcopy')]||{},to=((oo.contacts||[])[0]||{}).email||'';
+      var txt=(to?'Para: '+to+'\n':'')+'Asunto: '+(oo.subject||'')+'\n\n'+(oo.body||'');
+      function okc(){oc.textContent='Copiado ✓'}
+      try{navigator.clipboard.writeText(txt).then(okc,function(){selectText($('ob-'+oc.getAttribute('data-outcopy')));oc.textContent='Pulsa Ctrl+C'})}catch(err){selectText($('ob-'+oc.getAttribute('data-outcopy')));oc.textContent='Pulsa Ctrl+C'}
+      return}
+    var os=e.target.closest('button[data-outsent]');
+    if(os&&db){db.doc('outreach/'+os.getAttribute('data-outsent')).update({state:'sent',sentAt:new Date().toISOString()}).catch(function(){});return}
+    var orr=e.target.closest('button[data-outretry]');
+    if(orr&&db){var oid=orr.getAttribute('data-outretry'),op=state.posts.find(function(x){return x.id===oid})||(state.launches||[]).find(function(x){return x.id===oid})||{};
+      db.doc('outreach/'+oid).set({state:'requested',requestedAt:new Date().toISOString(),postId:oid,company:op.company||'',retry:true,kind:op.kind==='opp'||!op.source?'opp':'launch'}).catch(function(){});return}
+    var cp=e.target.closest('[data-copy]');
+    if(cp){copyForLinkedIn(cp);return}
+    var dl=e.target.closest('[data-dl]');
+    if(dl&&downloads){var dx=state.drafts.find(function(x){return x.id===dl.getAttribute('data-dl')});
+      fetch(dx.imageUrl).then(function(r){return r.blob()}).then(function(b){return downloads.save({filename:'linkedin-'+dx.date+'-'+dx.variant+'.png',data:b})}).catch(function(){});return}
+    var dp=e.target.closest('[data-dlpdf]');
+    if(dp&&downloads){var px=state.drafts.find(function(x){return x.id===dp.getAttribute('data-dlpdf')});
+      fetch(px.pdfUrl).then(function(r){return r.blob()}).then(function(b){return downloads.save({filename:'linkedin-'+px.date+'-'+px.variant+'.pdf',data:b})}).catch(function(){});return}
+    var dv=e.target.closest('[data-dlvid]');
+    if(dv&&downloads){var vx=state.drafts.find(function(x){return x.id===dv.getAttribute('data-dlvid')});
+      fetch(vx.videoUrl).then(function(r){return r.blob()}).then(function(b){return downloads.save({filename:'linkedin-'+vx.date+'-'+vx.variant+'.mp4',data:b})}).catch(function(){});return}
+    var ed=e.target.closest('[data-edit]');
+    if(ed){var k='ed-'+ed.getAttribute('data-edit');state.open[k]=!state.open[k];renderPanel();return}
+    var sv=e.target.closest('button[data-save]');
+    if(sv&&db){var vid=sv.getAttribute('data-save'),ta=$('ed-'+vid);if(!ta)return;
+      sv.textContent='Guardando…';
+      db.doc('drafts/'+vid).update({text:ta.value,editedAt:new Date().toISOString()}).then(function(){state.open['ed-'+vid]=false;renderPanel()},function(){sv.textContent='No se pudo guardar'});
+      return}
+    var sc=e.target.closest('button[data-sched]');
+    if(sc&&db){var sid=sc.getAttribute('data-sched'),inp=$('at-'+sid),at=inp&&inp.value;
+      if(!at||new Date(at)<new Date(Date.now()-60000)){if(inp)inp.focus();sc.textContent='Elige una fecha futura';return}
+      var cur=(state.drafts.find(function(x){return x.id===sid})||{}).linkedin||{};
+      db.doc('drafts/'+sid).update({linkedin:{state:'approved',at:at,tz:'Europe/Madrid',approvedAt:new Date().toISOString(),attempts:(cur.attempts||0)}}).catch(function(err){if(err&&err.code==='invalid_argument'){state.canWrite=false;renderPanel()}});
+      return}
+    var nw=e.target.closest('button[data-now]');
+    if(nw&&db){var nid=nw.getAttribute('data-now'),d0=new Date(),nowLocal=d0.getFullYear()+'-'+String(d0.getMonth()+1).padStart(2,'0')+'-'+String(d0.getDate()).padStart(2,'0')+'T'+String(d0.getHours()).padStart(2,'0')+':'+String(d0.getMinutes()).padStart(2,'0');
+      var cur2=(state.drafts.find(function(x){return x.id===nid})||{}).linkedin||{};
+      db.doc('drafts/'+nid).update({linkedin:{state:'approved',now:true,at:nowLocal,tz:'Europe/Madrid',approvedAt:d0.toISOString(),attempts:(cur2.attempts||0)}}).catch(function(err){if(err&&err.code==='invalid_argument'){state.canWrite=false;renderPanel()}});
+      return}
+    var us=e.target.closest('button[data-unsched]');
+    if(us&&db){var uid=us.getAttribute('data-unsched'),L=(state.drafts.find(function(x){return x.id===uid})||{}).linkedin||{};
+      var next=L.state==='scheduled'?{state:'cancel_requested'}:{state:'cancelled'};
+      db.doc('drafts/'+uid).update({linkedin:next}).catch(function(){});
+      return}
+    var pb=e.target.closest('button[data-pub]');
+    if(pb&&db){var pid=pb.getAttribute('data-pub');var px2=state.drafts.find(function(x){return x.id===pid})||{};
+      var now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+      var upd=isUsed(px2)?{status:'chosen',publishedAt:null}:{status:'published',publishedAt:today};
+      db.doc('drafts/'+pid).update(upd).catch(function(err){if(err&&err.code==='invalid_argument'){state.canWrite=false;renderPanel()}});
+      return}
+    var rc=e.target.closest('button[data-recover]');
+    if(rc&&db){var rid=rc.getAttribute('data-recover');rc.textContent='Recuperando…';
+      db.doc('drafts/'+rid).update({status:'pending',recoveredAt:new Date().toISOString(),decidedAt:new Date().toISOString()}).catch(function(err){if(err&&err.code==='invalid_argument'){state.canWrite=false;renderPanel()}});
+      return}
+    var ds=e.target.closest('button[data-draft]');
+    if(ds&&db){var did=ds.getAttribute('data-draft'),st=ds.getAttribute('data-st');var cur=state.drafts.find(function(x){return x.id===did})||{};
+      var next=(cur.status===st)?'pending':st;
+      var stamp=new Date().toISOString(),upd2={status:next,decidedAt:stamp};
+      if(next==='rejected'){upd2.discardedAt=stamp;upd2.discardSource='radar';if(!cur.discardReason&&cur.feedback)upd2.discardReason=cur.feedback}
+      else if(cur.status==='rejected'){upd2.recoveredAt=stamp}
+      db.doc('drafts/'+did).update(upd2).catch(function(err){if(err&&err.code==='invalid_argument'){state.canWrite=false;renderPanel()}});
+      if(next==='chosen')state.drafts.forEach(function(o){if(o.date===cur.date&&o.id!==did&&(o.status||'pending')==='pending')db.doc('drafts/'+o.id).update({status:'not_chosen'}).catch(function(){})});
+      return}
+    var b=e.target.closest('button[data-v],button[data-asp],button[data-reason]');
+    if(!b||!db)return;
+    var id=b.getAttribute('data-id');
+    var curDoc=state.votes[id]||{};
+    var cur=curDoc.v||0, aspects=(curDoc.aspects||[]).slice(), reasons=(curDoc.reasons||[]).slice(), next;
+    if(b.hasAttribute('data-reason')){
+      var rk=b.getAttribute('data-reason'),ri=reasons.indexOf(rk);
+      if(ri>=0)reasons.splice(ri,1);else reasons.push(rk);
+      next=cur;
+    }else if(b.hasAttribute('data-asp')){
+      var k=b.getAttribute('data-asp'),i=aspects.indexOf(k);
+      if(i>=0)aspects.splice(i,1);else aspects.push(k);
+      next=cur===2?2:(aspects.length?1:0);
+    }else{
+      var v=Number(b.getAttribute('data-v'));
+      next=cur===v?(aspects.length?1:0):v;
+      if(next===-1)aspects=[];
+      if((cur>0)!==(next>0)||next===0)reasons=[];
+    }
+    var post=state.posts.find(function(p){return p.id===id})||{};
+    var ref=db.doc('votes/'+id);
+    if(post.kind==='opp'&&next===2&&cur!==2&&(!state.outreach[id]||state.outreach[id].state==='error'))
+      db.doc('outreach/'+id).set({state:'requested',requestedAt:new Date().toISOString(),postId:id,company:post.company||''}).catch(function(){});
+    var p=next===0?ref.delete():ref.set({v:next,aspects:aspects,reasons:reasons,company:post.company||'',signal:post.signal||'',kind:post.kind||'',niche:post.niche||'',hookType:post.hookType||'',format:post.format||'',author:post.author||'',fit:post.fit||'',at:new Date().toISOString()});
+    p.catch(function(err){if(err&&err.code==='invalid_argument'){state.canWrite=false;renderPanel()}});
+  });
+
+  // LinkedIn no admite formato: convertimos **negrita** a caracteres Unicode en negrita (Mathematical Sans-Serif Bold).
+  function boldify(s){
+    return Array.from(s.normalize('NFD')).map(function(ch){
+      var c=ch.codePointAt(0);
+      if(c>=65&&c<=90)return String.fromCodePoint(0x1D5D4+c-65);
+      if(c>=97&&c<=122)return String.fromCodePoint(0x1D5EE+c-97);
+      if(c>=48&&c<=57)return String.fromCodePoint(0x1D7EC+c-48);
+      return ch;
+    }).join('').normalize('NFC');
+  }
+  function toLinkedIn(t){return String(t||'').replace(/\*\*([^*\n]+?)\*\*/g,function(_,x){return boldify(x)})}
+  // El editor de LinkedIn junta los párrafos si pegas texto plano: copiamos HTML con un <p> por línea y <p><br></p> en las líneas vacías.
+  function linkedInHtml(t){
+    return t.split('\n').map(function(l){return l.trim()?'<p>'+esc(l)+'</p>':'<p><br></p>'}).join('');
+  }
+  function copyForLinkedIn(btn){
+    var x=state.drafts.find(function(d){return d.id===btn.getAttribute('data-copy')})||{};
+    var plain=toLinkedIn(x.text), html=linkedInHtml(plain);
+    function ok(){btn.textContent='Copiado ✓ (pégalo en LinkedIn)'}
+    function viaSelection(){
+      var box=document.createElement('div');box.contentEditable='true';box.innerHTML=html;
+      box.style.cssText='position:fixed;left:-9999px;top:0;white-space:normal';document.body.appendChild(box);
+      var r=document.createRange();r.selectNodeContents(box);var s=window.getSelection();s.removeAllRanges();s.addRange(r);
+      var done=false;try{done=document.execCommand('copy')}catch(e){}
+      s.removeAllRanges();box.remove();
+      if(done)ok();else{selectText($('dt-'+x.id));btn.textContent='Pulsa Ctrl+C'}
+    }
+    try{
+      if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){
+        navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([plain],{type:'text/plain'})})]).then(ok,viaSelection);
+      }else viaSelection();
+    }catch(e){viaSelection()}
+  }
+  function selectText(el){if(!el)return;var r=document.createRange();r.selectNodeContents(el);var s=window.getSelection();s.removeAllRanges();s.addRange(r)}
+  $('panel').addEventListener('change',function(e){
+    var rr=e.target.closest('[data-rreason]');
+    if(rr&&db){db.doc('drafts/'+rr.getAttribute('data-rreason')).update({discardReason:rr.value.slice(0,1000)}).catch(function(){});return}
+    var f=e.target.closest('[data-fb]');if(!f||!db)return;
+    db.doc('drafts/'+f.getAttribute('data-fb')).update({feedback:f.value}).catch(function(){});
+  });
+
+  render();
+
+  if(window.claude&&window.claude.use){
+    window.claude.use('downloads').then(function(d){downloads=d;if(state.tab==='para')renderPanel()});
+    window.claude.use('db').then(function(d){
+      if(!d){$('panel').innerHTML='<div class="empty"><h3>Base de datos no disponible</h3><p>Abre el radar con tu cuenta de Claude para ver las publicaciones y votar.</p></div>';return}
+      db=d;
+      db.collection('posts').onSnapshot(function(s){state.posts=s.docs.map(function(x){return x.data()});render()},function(){});
+      db.collection('drafts').onSnapshot(function(s){state.drafts=s.docs.map(function(x){var o=Object.assign({},x.data());o.id=x.id;return o});render()},function(){});
+      db.collection('launches').onSnapshot(function(s){state.launches=s.docs.map(function(x){var o=Object.assign({},x.data());o.id=x.id;return o});if(state.tab==='lau')renderPanel();renderStrip()},function(){});
+      db.collection('formats').onSnapshot(function(s){state.formats=s.docs.map(function(x){var o=Object.assign({},x.data());o.id=x.id;return o});if(state.tab==='fmt')renderPanel();renderStrip()},function(){});
+      db.collection('outreach').onSnapshot(function(s){var o={};s.docs.forEach(function(x){o[x.id]=x.data()});state.outreach=o;if(state.tab==='opp'||state.tab==='lau')renderPanel()},function(){});
+      db.collection('votes').onSnapshot(function(s){var o={};s.docs.forEach(function(x){o[x.id]=x.data()});state.votes=o;render()},function(){});
+    });
+  }else{
+    $('panel').innerHTML='<div class="empty"><h3>Base de datos no disponible</h3><p>Abre el radar en Claude para ver las publicaciones y votar.</p></div>';
+  }
+})();
+</script>

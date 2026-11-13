@@ -1,0 +1,70 @@
+<!-- Gráfico con Chart.js, estilo "titular con giro + anotación + cifras grandes" (referencia: post de NVIDIA que gustó a Kevin, 2026-11-04).
+SPEC: {eyebrow?, title | titleParts: [{text, style: "plain"|"accent"|"bad"}], subtitle?,
+       chart: {type: "line"|"bar"|"doughnut", labels: [...], datasets: [{label, data, color?}]},
+       yPrefix?: "$", ySuffix?, xTicks?: [índices de etiquetas a mostrar en el eje X], annotation?: {index, label, sub?}, highlight?: índice (barras),
+       metrics?: [{value, label, tone: "bad"|"good"|"neutral"}], source?}
+Solo datos reales y siempre con fuente. -->
+<style>
+#canvas{background:radial-gradient(1000px 700px at 0% 0%,#2f55ff2e,transparent 60%),#0b1020;color:#fff;padding:64px 64px 48px}
+#t{font:800 74px/1.02 var(--display);letter-spacing:-.03em;margin-top:12px;text-wrap:balance}
+#t .accent{color:#5ee0a0}#t .bad{color:#ff6b6b}
+.legend{display:flex;flex-wrap:wrap;gap:12px 34px;margin-top:26px;font:500 25px var(--body);color:#dfe3ef}
+.legend span{display:inline-flex;align-items:center;gap:12px}
+.legend i{display:inline-block;width:44px;height:8px;border-radius:4px}
+#wrap{position:relative;flex:1;margin-top:18px;min-height:0}
+.metrics{display:flex;align-items:stretch;justify-content:space-around;margin-top:26px}
+.metric{text-align:center;padding:0 18px}
+.metric b{display:block;font:800 104px/1 var(--display);letter-spacing:-.04em}
+.metric span{display:block;margin-top:10px;font:800 28px/1 var(--display);letter-spacing:.06em;text-transform:uppercase;color:#fff}
+.metric.bad b{color:#ff6b6b}.metric.good b{color:#5ee0a0}.metric.neutral b{color:#8ea2ff}
+.sep{width:2px;background:#2a3150;border-radius:1px}
+.src{margin-top:22px;font:400 20px/1.45 var(--body);color:#9aa1b5;white-space:pre-line}
+</style>
+<div id="canvas"><div class="eyebrow" id="eb"></div><h1 id="t"></h1><p class="sub" id="s" style="color:#c9cee0;margin-top:14px"></p>
+<div class="legend" id="lg"></div><div id="wrap"><canvas id="ch"></canvas></div><div class="metrics" id="mt"></div><div class="src" id="src"></div><div id="f"></div></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+  var S=SPEC,cfg=S.chart,pal=['#3d6bff','#5ee0a0','#f5a524','#ff6b6b','#c4b5fd'];
+  document.getElementById('eb').textContent=S.eyebrow||'';
+  document.getElementById('t').innerHTML=S.titleParts?S.titleParts.map(function(p){return '<span class="'+(p.style||'plain')+'">'+esc(p.text)+'</span>'}).join(' '):esc(S.title||'');
+  document.getElementById('s').textContent=S.subtitle||'';
+  document.getElementById('src').textContent=S.source?('Source: '+S.source):'';
+  document.getElementById('f').outerHTML=footer(true);
+  cfg.datasets.forEach(function(d,i){d._c=d.color||pal[i%pal.length]});
+  if(cfg.type!=='doughnut'&&cfg.datasets.length>1)
+    document.getElementById('lg').innerHTML=cfg.datasets.map(function(d){return '<span><i style="background:'+d._c+'"></i>'+esc(d.label)+'</span>'}).join('');
+  var M=S.metrics||[];
+  document.getElementById('mt').innerHTML=M.map(function(m,i){return (i?'<div class="sep"></div>':'')+'<div class="metric '+(m.tone||'neutral')+'"><b>'+esc(m.value)+'</b><span>'+esc(m.label)+'</span></div>'}).join('');
+  if(!M.length)document.getElementById('mt').style.display='none';
+  cfg.datasets.forEach(function(d){
+    if(cfg.type==='bar'&&S.highlight!=null&&cfg.datasets.length===1){d.backgroundColor=d.data.map(function(_,j){return j===S.highlight?'#5ee0a0':'#33405f'})}
+    else d.backgroundColor=cfg.type==='doughnut'?pal:d._c;
+    d.borderColor=cfg.type==='doughnut'?'#0b1020':d._c;d.borderWidth=cfg.type==='line'?7:0;d.borderRadius=cfg.type==='bar'?10:0;
+    d.tension=.35;d.pointRadius=0;d.cubicInterpolationMode='monotone';
+  });
+  var A=S.annotation;
+  var annot={id:'annot',afterDatasetsDraw:function(ch){
+    if(!A)return;var x=ch.scales.x.getPixelForValue(A.index),a=ch.chartArea,c=ch.ctx;
+    c.save();c.strokeStyle='#e8eaf2';c.lineWidth=2.5;c.setLineDash([8,7]);c.beginPath();c.moveTo(x,a.top+40);c.lineTo(x,a.bottom);c.stroke();c.setLineDash([]);
+    c.font='800 25px '+getComputedStyle(document.documentElement).getPropertyValue('--display');var w1=c.measureText(A.label).width;
+    c.font='500 23px '+getComputedStyle(document.documentElement).getPropertyValue('--body');var w2=A.sub?c.measureText(A.sub).width:0;
+    var bw=Math.max(w1,w2)+44,bh=A.sub?84:54,bx=Math.min(Math.max(x+18,a.left),a.right-bw),by=a.top-50;
+    c.fillStyle='#0b1020';c.strokeStyle='#5ee0a0';c.lineWidth=2.5;c.beginPath();c.roundRect(bx,by,bw,bh,12);c.fill();c.stroke();
+    c.beginPath();c.moveTo(x,a.top+40);c.lineTo(bx,by+bh/2);c.strokeStyle='#5ee0a0';c.stroke();
+    c.fillStyle='#fff';c.textAlign='center';c.font='800 25px '+getComputedStyle(document.documentElement).getPropertyValue('--display');c.fillText(A.label,bx+bw/2,by+34);
+    if(A.sub){c.fillStyle='#c9cee0';c.font='500 23px '+getComputedStyle(document.documentElement).getPropertyValue('--body');c.fillText(A.sub,bx+bw/2,by+66)}
+    c.restore();}};
+  var fmt=function(v){return (S.yPrefix||'')+Number(v).toLocaleString('en-US')+(S.ySuffix||'')};
+  var bodyFont=getComputedStyle(document.documentElement).getPropertyValue('--body');
+  document.fonts.ready.then(function(){
+    Chart.defaults.font.family=bodyFont;Chart.defaults.font.size=26;Chart.defaults.color='#dfe3ef';
+    new Chart(document.getElementById('ch'),{type:cfg.type,data:{labels:cfg.labels,datasets:cfg.datasets},plugins:[annot],
+      options:{responsive:true,maintainAspectRatio:false,animation:false,layout:{padding:{top:A?64:10,left:6,right:14,bottom:4}},
+        plugins:{legend:{display:cfg.type==='doughnut'},tooltip:{enabled:false}},
+        scales:cfg.type==='doughnut'?{}:{x:{grid:{display:false},border:{color:'#e8eaf2',width:2},ticks:S.xTicks?{maxRotation:0,autoSkip:false,font:{size:24},callback:function(v,i){return S.xTicks.indexOf(i)>=0?this.getLabelForValue(v):''}}:{maxRotation:0,autoSkip:true,maxTicksLimit:5,font:{size:24}}},
+          y:{grid:{color:'#26304d'},border:{display:false},beginAtZero:true,ticks:{callback:fmt,maxTicksLimit:8,font:{size:24}}}}}});
+    done();
+  });
+})();
+</script>

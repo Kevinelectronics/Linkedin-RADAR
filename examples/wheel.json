@@ -1,0 +1,18 @@
+{
+ "template": "wheel",
+ "theme": "plex",
+ "title": "AI-native data stack 2027",
+ "highlight": "data stack",
+ "subtitle": "What I actually run to go from raw data to a published insight.",
+ "center": {"label": "Python", "logo": "logo:python"},
+ "pointerTo": 0,
+ "segments": [
+  {"label": "market data", "color": "#b9ecb0", "items": [{"name": "EODHD", "logo": "fav:eodhd.com"}, {"name": "FRED", "logo": "fav:fred.stlouisfed.org"}, {"name": "SEC EDGAR", "logo": "fav:sec.gov"}]},
+  {"label": "scraping", "color": "#c7d2ff", "items": [{"name": "Apify", "logo": "logo:apify"}, {"name": "Playwright", "logo": "logo:playwright"}, {"name": "Firecrawl", "logo": "fav:firecrawl.dev"}, {"name": "Gaffa", "logo": "fav:gaffa.dev"}]},
+  {"label": "AI agents", "color": "#f6d3fa", "items": [{"name": "Claude", "logo": "logo:claude-icon"}, {"name": "OpenAI", "logo": "logo:openai"}, {"name": "LangChain", "logo": "si:langchain"}]},
+  {"label": "storage", "color": "#ffdcb5", "items": [{"name": "DuckDB", "logo": "fav:duckdb.org"}, {"name": "Postgres", "logo": "logo:postgresql"}, {"name": "Supabase", "logo": "logo:supabase"}]},
+  {"label": "shipping", "color": "#c6efe4", "items": [{"name": "GitHub", "logo": "logo:github-icon"}, {"name": "Docker", "logo": "logo:docker"}, {"name": "Vercel", "logo": "logo:vercel"}]},
+  {"label": "distribution", "color": "#fff0a3", "items": [{"name": "LinkedIn", "logo": "logo:linkedin-icon"}, {"name": "dev.to", "logo": "si:devdotto"}, {"name": "Zernio", "logo": "fav:zernio.com"}, {"name": "YouTube", "logo": "logo:youtube-icon"}]}
+ ],
+ "shared": {"label": "Every day", "items": [{"name": "Claude Code", "logo": "logo:claude-icon"}, {"name": "VS Code", "logo": "logo:visual-studio-code"}, {"name": "Notion", "logo": "logo:notion"}, {"name": "Gmail", "logo": "logo:google-gmail"}]}
+}

@@ -1,0 +1,56 @@
+<!-- Contraste A vs B, visual: cada lado es un "documento" dibujado con bloques-esqueleto e iconos;
+el momento clave (p. ej. el primer éxito) se marca con una bandera brillante y abajo va una métrica grande.
+SPEC: {eyebrow?, title, subtitle?,
+       left:  {label, items: [{icon, label}] | points: [..], mark?: índice del bloque destacado, markLabel?, metric, metricLabel?},
+       right: {...mismo formato...}}
+Retrocompatible: si un lado trae `points` (texto) y no `items`, se convierten en bloques; `verdict` se usa como metricLabel. -->
+<style>
+#canvas{background:radial-gradient(900px 600px at 0% 0%,#2f55ff33,transparent 60%),radial-gradient(800px 600px at 100% 100%,#1fbf7526,transparent 60%),var(--ink);color:#fff;padding:64px 64px 48px}
+.cols{margin-top:34px;display:grid;grid-template-columns:1fr 1fr;gap:26px;flex:1;min-height:0}
+.side{display:grid;grid-template-rows:auto 1fr auto;gap:18px;min-height:0}
+.tag{justify-self:start;align-self:flex-start;font:700 22px/1 var(--display);padding:10px 18px;border-radius:999px;letter-spacing:.01em}
+.l .tag{background:#ef5b5b22;color:#ff8a8a;border:2px solid #ef5b5b66}
+.r .tag{background:#1fbf7522;color:#5ee0a0;border:2px solid #1fbf7566}
+.doc{position:relative;min-height:0;justify-content:space-evenly;background:#f6f7fb;border-radius:26px;padding:22px 20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden}
+.doc:before{content:"";display:block;height:14px;width:72px;border-radius:7px;background:#d9dce6;margin-bottom:4px}
+.blk{position:relative;display:flex;align-items:center;gap:14px;border-radius:16px;padding:18px 16px;flex:1;max-height:150px;background:#e6e8f0;color:#5b6275}
+.blk .ic{flex:none;width:48px;height:48px;border-radius:13px;background:#fff;display:grid;place-items:center;font-size:26px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.blk .tx{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.blk b{font:600 21px/1.15 var(--body);color:#2a2f45}
+.blk i{display:block;height:8px;border-radius:4px;background:#cfd3df;width:var(--w,80%)}
+.blk.dim{opacity:.55}
+.l .blk.hit{background:#fde7e7;outline:4px solid #ef5b5b;opacity:1}
+.r .blk.hit{background:#dcf7e9;outline:4px solid #1fbf75;opacity:1}
+.flag{position:absolute;right:14px;top:-17px;font:800 17px/1 var(--display);color:#fff;padding:8px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.l .flag{background:#ef5b5b}.r .flag{background:#1fbf75;color:#0f1220}
+.r .blk.hit{box-shadow:0 0 0 10px #1fbf7522,0 10px 30px #1fbf7555}
+.metric{display:flex;flex-direction:column;gap:6px}
+.metric .n{font:800 72px/1 var(--display);letter-spacing:-.03em;white-space:nowrap}
+.l .metric .n{color:#ff8a8a}.r .metric .n{color:#5ee0a0}
+.metric .m{font:500 22px/1.25 var(--body);color:#aab1c7}
+</style>
+<div id="canvas"><div class="eyebrow" id="eb"></div><h1 id="t" style="margin-top:12px;font-size:70px"></h1><p class="sub" id="s" style="margin-top:12px"></p>
+<div class="cols"><div class="side l" id="L"></div><div class="side r" id="R"></div></div><div id="f"></div></div>
+<script>
+(function(){
+  document.getElementById('eb').textContent=SPEC.eyebrow||'';
+  document.getElementById('t').textContent=SPEC.title||'';
+  document.getElementById('s').textContent=SPEC.subtitle||'';
+  var widths=['82%','64%','74%','55%','70%','60%'];
+  function side(x,isLeft){
+    var items=x.items||(x.points||[]).map(function(p){return {icon:isLeft?'✕':'✓',label:String(p).replace(/^[①-⑩\d.\s]+/,'')}});
+    var mark=x.mark==null?(isLeft?items.length-1:0):x.mark;
+    var blocks=items.map(function(it,i){
+      var hit=i===mark, dim=!hit&&i>mark&&!isLeft;
+      return '<div class="blk'+(hit?' hit':'')+(dim?' dim':'')+'"><div class="ic">'+iconHTML(it.icon||'•')+'</div><div class="tx"><b>'+esc(it.label)+'</b><i style="--w:'+widths[i%widths.length]+'"></i></div>'+
+        (hit?'<span class="flag">🏁 '+esc(x.markLabel||'First success')+'</span>':'')+'</div>';
+    }).join('');
+    return '<div class="tag">'+esc(x.label)+'</div><div class="doc">'+blocks+'</div>'+
+      '<div class="metric"><span class="n">'+esc(x.metric||'')+'</span><span class="m">'+esc(x.metricLabel||x.verdict||'')+'</span></div>';
+  }
+  document.getElementById('L').innerHTML=side(SPEC.left,true);
+  document.getElementById('R').innerHTML=side(SPEC.right,false);
+  document.getElementById('f').outerHTML=footer(true);
+  done();
+})();
+</script>

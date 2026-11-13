@@ -1,0 +1,3 @@
+{"template":"code","title":"Real prices in 6 lines of Python","language":"python","filename":"eod_prices.py","footer":"#Python #APIs",
+ "code":"import requests\n\nurl = \"https://eodhd.com/api/eod/AAPL.US\"\nparams = {\"api_token\": \"YOUR_KEY\", \"fmt\": \"json\", \"from\": \"2026-01-01\"}\nprices = requests.get(url, params=params).json()\nprint(prices[-1][\"close\"])",
+ "caption":"Give your AI this instead of asking it to remember a price."}

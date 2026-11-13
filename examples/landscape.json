@@ -1,0 +1,20 @@
+{
+ "template": "landscape",
+ "theme": "plex",
+ "title": "The Web Data Landscape",
+ "highlight": "Web Data",
+ "subtitle": "40+ tools across 9 layers, grouped by the job they do.",
+ "accent": "#2f55ff",
+ "top": {"label": "AI agents", "sub": "Who asks for the data", "items": [{"name": "Claude", "logo": "logo:claude-icon"}, {"name": "ChatGPT", "logo": "logo:openai"}, {"name": "Gemini", "logo": "si:googlegemini"}, {"name": "Perplexity", "logo": "si:perplexity"}]},
+ "rows": [
+  {"label": "Browser automation", "sub": "Drive a real browser", "items": [{"name": "Playwright", "logo": "logo:playwright"}, {"name": "Puppeteer", "logo": "logo:puppeteer"}, {"name": "Selenium", "logo": "logo:selenium"}, {"name": "Browser Use", "logo": "fav:browser-use.com"}]},
+  {"label": "Cloud browsers", "sub": "Remote, stealth sessions", "items": [{"name": "Browserbase", "logo": "fav:browserbase.com"}, {"name": "Steel", "logo": "fav:steel.dev"}, {"name": "Hyperbrowser", "logo": "fav:hyperbrowser.ai"}, {"name": "Gologin", "logo": "fav:gologin.com"}]},
+  {"label": "Scraping APIs", "sub": "URL in, data out", "items": [{"name": "ScraperAPI", "logo": "fav:scraperapi.com"}, {"name": "ZenRows", "logo": "fav:zenrows.com"}, {"name": "ScrapingBee", "logo": "fav:scrapingbee.com"}, {"name": "Scrapingdog", "logo": "fav:scrapingdog.com"}]},
+  {"label": "SERP APIs", "sub": "Search results as JSON", "items": [{"name": "SerpApi", "logo": "fav:serpapi.com"}, {"name": "Serper", "logo": "fav:serper.dev"}, {"name": "DataForSEO", "logo": "fav:dataforseo.com"}, {"name": "SearchApi", "logo": "fav:searchapi.io"}]},
+  {"label": "LLM-ready extraction", "sub": "Pages to Markdown", "items": [{"name": "Firecrawl", "logo": "fav:firecrawl.dev"}, {"name": "Jina Reader", "logo": "fav:jina.ai"}, {"name": "Exa", "logo": "fav:exa.ai"}, {"name": "Tavily", "logo": "fav:tavily.com"}]},
+  {"label": "Proxies", "sub": "Don't get blocked", "items": [{"name": "Bright Data", "logo": "fav:brightdata.com"}, {"name": "Oxylabs", "logo": "fav:oxylabs.io"}, {"name": "Decodo", "logo": "fav:decodo.com"}, {"name": "IPRoyal", "logo": "fav:iproyal.com"}]},
+  {"label": "Platforms", "sub": "Ready-made scrapers", "items": [{"name": "Apify", "logo": "logo:apify"}, {"name": "Gaffa", "logo": "fav:gaffa.dev"}, {"name": "Zyte", "logo": "fav:zyte.com"}, {"name": "Octoparse", "logo": "fav:octoparse.com"}]},
+  {"label": "Market data APIs", "sub": "Prices & fundamentals", "items": [{"name": "EODHD", "logo": "fav:eodhd.com"}, {"name": "FRED", "logo": "fav:fred.stlouisfed.org"}, {"name": "SEC EDGAR", "logo": "fav:sec.gov"}]},
+  {"label": "Storage", "sub": "Keep what you scraped", "items": [{"name": "DuckDB", "logo": "fav:duckdb.org"}, {"name": "Postgres", "logo": "logo:postgresql"}, {"name": "Supabase", "logo": "logo:supabase"}, {"name": "S3", "logo": "logo:aws-s3"}]}
+ ]
+}
