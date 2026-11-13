@@ -1,5 +1,7 @@
 # LinkedIn Radar
 
+![LinkedIn Radar: content ideas and clients from LinkedIn, every day](docs/cover.png)
+
 A small system that finds **content ideas and clients on LinkedIn** every day, built with Claude.
 
 I'm a technical writer for SaaS and API companies, and LinkedIn is my main channel for finding clients. Every post has two jobs: it's content, and it's how clients find me. Doing that by hand every day doesn't scale, so I built this.
